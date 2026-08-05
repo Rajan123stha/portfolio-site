@@ -1,0 +1,358 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * ── Design system ───────────────────────────────────────────────────────────
+ *
+ * Dark-first, technical-editorial. Three deliberate choices drive everything:
+ *
+ * 1. True-neutral greys. The previous palette was blue-tinted (`222 84% 4.9%`),
+ *    which fights any accent placed on it and reads as a default rather than a
+ *    decision. Neutral greys let the accent be the only colour in the room.
+ *
+ * 2. Hairlines over shadows. Depth comes from 1px borders, a faint grain, and
+ *    layered surfaces — not drop shadows, which look heavy at scale and muddy
+ *    in dark mode.
+ *
+ * 3. Monospace as structure. Section numbers, dates and metadata are set in
+ *    mono. It signals the subject matter without resorting to decoration.
+ */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 6%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 6%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 6%;
+
+    /* Indigo, echoing the logo's indigo→violet gradient. */
+    --primary: 243 75% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 6% 10%;
+
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 42%;
+
+    --accent: 240 5% 96%;
+    --accent-foreground: 240 6% 10%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 243 75% 55%;
+
+    /* Surface that sits one step above the page background. */
+    --elevated: 240 5% 98%;
+    /* Secondary accent, used only in gradients alongside --primary. */
+    --accent-2: 280 70% 60%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 240 10% 4%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 8% 6%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 8% 7%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Lifted for legibility against a near-black page. */
+    --primary: 245 90% 70%;
+    --primary-foreground: 240 10% 4%;
+
+    --secondary: 240 5% 12%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 5% 11%;
+    --muted-foreground: 240 5% 62%;
+
+    --accent: 240 5% 13%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5% 15%;
+    --input: 240 5% 15%;
+    --ring: 245 90% 70%;
+
+    --elevated: 240 7% 8%;
+    --accent-2: 280 80% 68%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* Stops the page shifting sideways when a modal locks body scroll. */
+    scrollbar-gutter: stable;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  /* Anchor navigation has to clear the sticky header. */
+  :target {
+    scroll-margin-top: 6rem;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Selection in the accent colour ties the whole page together. */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.25);
+    color: hsl(var(--foreground));
+  }
+
+  /* A scrollbar that belongs to the design rather than the OS. */
+  @supports selector(::-webkit-scrollbar) {
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: hsl(var(--background));
+    }
+    ::-webkit-scrollbar-thumb {
+      background: hsl(var(--border));
+      border: 2px solid hsl(var(--background));
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: hsl(var(--muted-foreground) / 0.5);
+    }
+  }
+}
+
+@layer components {
+  /*
+   * Surface primitives. Cards read as layered paper: a slightly lifted
+   * background, a hairline edge, and a top highlight that catches the eye the
+   * way a bevel would — without a shadow.
+   */
+  .surface {
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+  }
+
+  .surface-hover {
+    transition:
+      border-color 0.3s ease,
+      background-color 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .surface-hover:hover {
+    border-color: hsl(var(--primary) / 0.4);
+    background-color: hsl(var(--elevated));
+  }
+
+  /* Hairline that fades out at both ends — used to separate sections. */
+  .rule-fade {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      hsl(var(--border)),
+      transparent
+    );
+  }
+
+  /* Small uppercase mono label used for eyebrows and metadata. */
+  .label-mono {
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /*
+   * Gradient text. `background-clip: text` needs a painted background, so the
+   * gradient is declared here rather than assembled from utility classes.
+   */
+  /*
+   * Weighted toward the foreground colour, with the accent passing through as a
+   * highlight. An evenly-spread version read as flat purple — the name is the
+   * page's primary text and has to stay legible first, decorative second.
+   */
+  .text-gradient {
+    background-image: linear-gradient(
+      110deg,
+      hsl(var(--foreground)) 0%,
+      hsl(var(--foreground)) 25%,
+      hsl(var(--primary)) 50%,
+      hsl(var(--accent-2)) 62%,
+      hsl(var(--foreground)) 85%,
+      hsl(var(--foreground)) 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradient-pan 8s linear infinite;
+  }
+}
+
+@layer utilities {
+  /*
+   * Film grain. A data-URI SVG turbulence at very low opacity — it costs
+   * nothing, needs no network request, and is the single cheapest way to stop
+   * large flat areas looking like unrendered CSS.
+   */
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+  }
+
+  /*
+   * Blueprint grid, fading out toward the edges via a mask.
+   *
+   * Drawn from `--foreground` at low alpha rather than `--border`: the border
+   * token is already near-white in light mode, so a grid built from it was
+   * invisible on the page background it was meant to sit on.
+   */
+  .grid-bg {
+    background-image:
+      linear-gradient(
+        to right,
+        hsl(var(--foreground) / 0.07) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        hsl(var(--foreground) / 0.07) 1px,
+        transparent 1px
+      );
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(
+      ellipse 80% 60% at 50% 40%,
+      black 20%,
+      transparent 75%
+    );
+    mask-image: radial-gradient(
+      ellipse 80% 60% at 50% 40%,
+      black 20%,
+      transparent 75%
+    );
+  }
+
+  /* Fades a horizontally scrolling strip out at both edges. */
+  .mask-edges {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 12%,
+      black 88%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 12%,
+      black 88%,
+      transparent
+    );
+  }
+
+  .animate-gradient {
+    animation: gradient-pan 8s linear infinite;
+  }
+
+  .animate-marquee {
+    animation: marquee 40s linear infinite;
+  }
+
+  /* Fluid display sizes — no breakpoint jumps between phone and desktop. */
+  .text-display {
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+  }
+
+  .text-section {
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+}
+
+/*
+ * Custom cursor.
+ *
+ * Opt-in per subtree and only where a fine pointer exists. This was previously
+ * a global `!important` rule, which left touch-and-trackpad hybrids with no
+ * visible cursor and made the admin panel unusable for data entry.
+ */
+@media (hover: hover) and (pointer: fine) {
+  [data-custom-cursor="true"],
+  [data-custom-cursor="true"] * {
+    cursor: none;
+  }
+}
+
+@keyframes gradient-pan {
+  from {
+    background-position: 0% center;
+  }
+  to {
+    background-position: 200% center;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  /* The track renders its content twice, so -50% is a seamless loop point. */
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/*
+ * Honour the OS "reduce motion" setting. Animations collapse to their end state
+ * rather than being removed, so nothing vanishes — it just arrives without
+ * travelling.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
