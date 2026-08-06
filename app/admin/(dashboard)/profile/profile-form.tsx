@@ -15,11 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { updateProfile } from "@/lib/actions/settings";
 import type { Profile } from "@/db/schema";
-import {
-  HERO_BADGE_POSITIONS,
-  type ColorToken,
-  type HeroBadgePosition,
-} from "@/lib/design-tokens";
+import type { ColorToken, HeroBadgePosition } from "@/lib/design-tokens";
 import { profileSchema, type ProfileInput } from "@/lib/validators/content";
 
 /** A brand-new install has no row yet, so the form starts from these. */
@@ -274,7 +270,7 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
           render={({ field }) => (
             <ImageField
               label="Portrait"
-              hint="Square works best — it's cropped into a circle."
+              hint="Not shown on the page — the hero uses a code card instead. Used as the social share image when no dedicated one is set under Settings & SEO."
               aspect="square"
               value={field.value ?? null}
               publicId={watch("avatarPublicId") ?? null}
@@ -303,8 +299,8 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
       </Panel>
 
       <Panel
-        title="Floating badges"
-        description="Pills that orbit your portrait. Up to four."
+        title="Stack"
+        description="Rendered as the `stack` array inside the hero's code card. Up to four."
       >
         {badges.fields.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
@@ -322,27 +318,14 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
                     {...register(`heroBadges.${index}.label`)}
                     className={inputClass}
                     placeholder="React"
-                    aria-label={`Badge ${index + 1} label`}
+                    aria-label={`Stack item ${index + 1}`}
                   />
-                  <Controller
-                    control={control}
-                    name={`heroBadges.${index}.position`}
-                    render={({ field: positionField }) => (
-                      <select
-                        {...positionField}
-                        aria-label={`Badge ${index + 1} position`}
-                        className={inputClass}
-                      >
-                        {Object.entries(HERO_BADGE_POSITIONS).map(
-                          ([token, { label }]) => (
-                            <option key={token} value={token}>
-                              {label}
-                            </option>
-                          ),
-                        )}
-                      </select>
-                    )}
-                  />
+                  {/*
+                    `position` is still stored, but the hero no longer floats
+                    these around a portrait, so there is nothing for the control
+                    to change. Showing a picker that does nothing is worse than
+                    showing none.
+                  */}
                   <Button
                     type="button"
                     variant="ghost"

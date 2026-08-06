@@ -1,14 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowUpRight, Download, MapPin } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { TypewriterEffect } from "@/components/ui/typewriter-effect";
-import { resolveBadgePosition, resolveColor } from "@/lib/design-tokens";
 import type { ProfileView, SectionView } from "@/lib/queries/public";
+import { CodeCard } from "./code-card";
 import { TechMarquee } from "./tech-marquee";
 
 type HeroProps = {
@@ -42,8 +41,6 @@ export function Hero({ profile, tech }: HeroProps) {
     availabilityVisible,
     heroBio,
     openTo,
-    heroBadges,
-    avatarUrl,
     location,
     experienceYears,
     experienceLabel,
@@ -199,14 +196,14 @@ export function Hero({ profile, tech }: HeroProps) {
             ) : null}
           </div>
 
-          {/* ── RIGHT: portrait ── */}
+          {/* ── RIGHT: the profile, as source ── */}
           <motion.div
             variants={rise}
-            className="relative mx-auto w-full max-w-sm lg:mx-0"
+            className="relative mx-auto w-full max-w-md lg:mx-0"
           >
             <div className="relative">
               {/*
-                Offset frame: a second bordered rectangle behind the portrait,
+                Offset frame: a second bordered rectangle behind the card,
                 nudged down-right. It reads as intentional composition where a
                 drop shadow would just read as a default.
               */}
@@ -215,64 +212,14 @@ export function Hero({ profile, tech }: HeroProps) {
                 className="absolute inset-0 translate-x-3 translate-y-3 rounded-2xl border border-primary/25"
               />
 
-              <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
-                {/*
-                  A soft wash behind the portrait, so a cut-out photo has
-                  something to sit on instead of floating on flat card colour.
-                */}
-                <div
-                  aria-hidden
-                  className="absolute inset-0 bg-gradient-to-b from-primary/[0.08] via-transparent to-accent-2/[0.06]"
-                />
-
-                <div className="relative aspect-[4/5] w-full">
-                  <Image
-                    src={avatarUrl || "/placeholder-user.jpg"}
-                    alt={fullName}
-                    fill
-                    sizes="(max-width: 1024px) 384px, 420px"
-                    className="object-cover"
-                    priority
-                  />
-                </div>
-
-                {/*
-                  The caption is a real bar under the image rather than an
-                  overlay. Overlaying it meant a gradient scrim across the
-                  photo's lower third just to keep the text readable.
-                */}
-                <div className="relative flex items-center gap-3 border-t border-border bg-card/80 px-4 py-3 backdrop-blur-sm">
-                  <span className="label-mono text-muted-foreground">
-                    {fullName}
-                  </span>
-                  <span aria-hidden className="h-px flex-1 bg-border" />
-                  <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-primary" />
-                </div>
-              </div>
-
-              {/* Floating tech pills, anchored to the frame's corners. */}
-              {heroBadges.map((badge, index) => (
-                <motion.span
-                  key={`${badge.label}-${index}`}
-                  className={`${resolveBadgePosition(badge.position)} z-10 flex items-center gap-2 rounded-full border border-border bg-background/90 px-3 py-1.5 backdrop-blur-md`}
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{
-                    delay: 0.7 + index * 0.09,
-                    type: "spring",
-                    stiffness: 220,
-                    damping: 18,
-                  }}
-                >
-                  <span
-                    aria-hidden
-                    className={`h-1.5 w-1.5 rounded-full ${resolveColor(badge.color)}`}
-                  />
-                  <span className="font-mono text-[11px] font-medium">
-                    {badge.label}
-                  </span>
-                </motion.span>
-              ))}
+              {/*
+                The stack pills that used to float around the portrait are gone.
+                Over a photo they were decoration; over readable code they sat
+                on top of the lines they were describing — and the card's
+                `stack:` array already lists exactly the same values, so keeping
+                both would have printed the same four words twice.
+              */}
+              <CodeCard profile={profile} className="relative" />
             </div>
           </motion.div>
         </motion.div>

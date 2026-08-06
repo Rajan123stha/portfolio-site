@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { publicEnv } from "@/lib/env.public";
-import { getSiteSettings } from "@/lib/queries/public";
+import { getPortfolio, getSiteSettings } from "@/lib/queries/public";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
@@ -23,12 +23,22 @@ const FALLBACK_METADATA = {
 export async function generateMetadata(): Promise<Metadata> {
   // Metadata must never be the reason a page 500s: a failed lookup degrades to
   // sensible defaults rather than taking the whole route down.
-  const settings = await getSiteSettings().catch(() => null);
+  const [settings, portfolio] = await Promise.all([
+    getSiteSettings().catch(() => null),
+    getPortfolio().catch(() => null),
+  ]);
 
   const title = settings?.metaTitle ?? FALLBACK_METADATA.title;
   const description =
     settings?.metaDescription ?? FALLBACK_METADATA.description;
-  const images = settings?.ogImageUrl ? [{ url: settings.ogImageUrl }] : undefined;
+
+  /*
+   * The portrait no longer appears on the page — the hero renders a code card
+   * instead — but a headshot is still the best default for a link preview, so
+   * it backs up the dedicated share image rather than going unused.
+   */
+  const shareImage = settings?.ogImageUrl ?? portfolio?.profile.avatarUrl;
+  const images = shareImage ? [{ url: shareImage }] : undefined;
 
   return {
     metadataBase: new URL(publicEnv.siteUrl),
