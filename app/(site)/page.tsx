@@ -69,6 +69,8 @@ export default async function PortfolioPage() {
         settings={settings}
         navItems={data.navItems}
         socialLinks={data.socialLinks}
+        contactLinks={data.contactLinks}
+        cvUrl={profile.cvUrl}
       />
 
       <main>

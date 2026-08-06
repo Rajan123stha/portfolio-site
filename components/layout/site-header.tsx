@@ -7,23 +7,29 @@ import { Menu, X } from "lucide-react";
 
 import { resolveIcon } from "@/lib/design-tokens";
 import type {
+  ContactLinkView,
   NavItemView,
   SiteSettingsView,
   SocialLinkView,
 } from "@/lib/queries/public";
 import { cn } from "@/lib/utils";
+import { CommandPalette } from "./command-palette";
 import { ThemeToggle } from "./theme-toggle";
 
 type SiteHeaderProps = {
   settings: SiteSettingsView;
   navItems: NavItemView[];
   socialLinks: SocialLinkView[];
+  contactLinks: ContactLinkView[];
+  cvUrl: string | null;
 };
 
 export function SiteHeader({
   settings,
   navItems,
   socialLinks,
+  contactLinks,
+  cvUrl,
 }: SiteHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState("");
@@ -170,7 +176,14 @@ export function SiteHeader({
           </nav>
 
           <div className="flex items-center gap-1.5">
-            <div className="hidden items-center gap-1.5 md:flex">
+            <CommandPalette
+              navItems={navItems}
+              socialLinks={socialLinks}
+              contactLinks={contactLinks}
+              cvUrl={cvUrl}
+            />
+
+            <div className="hidden items-center gap-1.5 lg:flex">
               {socials.map((link) => {
                 const Icon = resolveIcon(link.icon);
                 const external = link.href.startsWith("http");
