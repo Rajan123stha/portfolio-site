@@ -30,6 +30,12 @@ export const ADMIN_NAV: AdminNavGroup[] = [
         description: "At-a-glance status of your site",
       },
       {
+        href: "/admin/analytics",
+        label: "Analytics",
+        icon: "LineChart",
+        description: "Visitors, referrers and traffic trends",
+      },
+      {
         href: "/admin/messages",
         label: "Messages",
         icon: "MessageSquare",

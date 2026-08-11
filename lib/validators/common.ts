@@ -44,6 +44,31 @@ export const optionalUrl = z
   .nullable()
   .default(null);
 
+/**
+ * Image source: an absolute URL *or* a root-relative path.
+ *
+ * Images legitimately live in two places — uploaded to Cloudinary, or shipped
+ * in `/public` — so requiring `https://` rejects half of them. Using
+ * `optionalUrl` here made every seeded project and the profile impossible to
+ * save: `/image/dgmarket.png` failed validation, `handleSubmit` refused to
+ * submit, and the picker had nowhere to show the error, so the Save button
+ * simply appeared dead.
+ */
+export const optionalImageSrc = z
+  .union([
+    z.literal(""),
+    z
+      .string()
+      .trim()
+      .refine(
+        (value) => value.startsWith("/") || /^https?:\/\//.test(value),
+        "Enter a full URL or a path starting with /",
+      ),
+  ])
+  .transform((value) => (value === "" ? null : value))
+  .nullable()
+  .default(null);
+
 /** Accepts absolute URLs plus site-relative paths such as `/Rajan_CV.pdf`. */
 export const optionalHref = z
   .union([

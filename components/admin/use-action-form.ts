@@ -89,14 +89,75 @@ export function useActionForm<TSchema extends z.ZodTypeAny, TData = unknown>({
         }
 
         if (result.message) toast.success(result.message);
-        if (resetOnSuccess) form.reset(defaultValues);
+
+        /*
+         * Rebase the form's baseline onto what was just persisted.
+         *
+         * `isDirty` is computed against `defaultValues`, which `useForm` keeps
+         * from first render — so without this the form stayed "dirty" forever
+         * after a save and the button never settled back to "Saved", implying
+         * unsaved work that didn't exist. "Add" forms clear instead.
+         */
+        form.reset(resetOnSuccess ? defaultValues : values);
+
         onSuccess?.(result.data);
         resolve();
       });
     }),
+
+    /*
+     * Client-side validation failures must never be silent.
+     *
+     * `handleSubmit` simply doesn't invoke the submit handler when the schema
+     * rejects, so a field whose error has nowhere to render produces a Save
+     * button that looks broken — exactly what happened when image pickers held
+     * a `/public` path that the URL validator refused. Inline messages are
+     * still the primary channel; this is the backstop that guarantees the user
+     * always learns *something* went wrong, and where.
+     */
+    (fieldErrors) => {
+      const problems = collectMessages(fieldErrors);
+      if (problems.length === 0) return;
+
+      toast.error(
+        problems.length === 1
+          ? problems[0]
+          : `${problems.length} fields need attention`,
+        {
+          description:
+            problems.length > 1 ? problems.slice(0, 3).join(" · ") : undefined,
+        },
+      );
+
+      // Bring the first offending control into view; it may be inside a
+      // collapsed panel or far up a long form.
+      form.setFocus(Object.keys(fieldErrors)[0] as Path<z.input<TSchema>>, {
+        shouldSelect: false,
+      });
+    },
   );
 
   return { form, onSubmit, isPending };
+}
+
+/**
+ * Flattens react-hook-form's nested error tree into readable messages.
+ *
+ * Errors for array fields arrive as sparse arrays of objects (`bullets[2].text`),
+ * so a shallow `Object.values` would yield `[object Object]` for exactly the
+ * cases most likely to be missing an inline error slot.
+ */
+function collectMessages(errors: unknown, depth = 0): string[] {
+  if (!errors || typeof errors !== "object" || depth > 4) return [];
+
+  const record = errors as Record<string, unknown>;
+  const message = record.message;
+
+  if (typeof message === "string" && message.length > 0) return [message];
+
+  return Object.values(record).flatMap((value) =>
+    collectMessages(value, depth + 1),
+  );
 }
 
 /** Narrows `unknown` form values to a record for generic field helpers. */

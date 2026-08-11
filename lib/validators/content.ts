@@ -5,6 +5,7 @@ import {
   heroBadgePosition,
   iconName,
   optionalHref,
+  optionalImageSrc,
   optionalText,
   optionalUrl,
   requiredHref,
@@ -33,7 +34,7 @@ export const siteSettingsSchema = z.object({
   metaTitle: requiredText("Meta title", 70),
   metaDescription: requiredText("Meta description", 200),
   metaKeywords: textList(60),
-  ogImageUrl: optionalUrl,
+  ogImageUrl: optionalImageSrc,
   gaMeasurementId: z
     .union([
       z.literal(""),
@@ -70,7 +71,7 @@ export const profileSchema = z.object({
   openTo: textList(60),
   // Positions repeat freely; overlapping badges are a design choice, not an error.
   heroBadges: z.array(heroBadgeSchema).max(4, "Up to four badges").default([]),
-  avatarUrl: optionalUrl,
+  avatarUrl: optionalImageSrc,
   avatarPublicId: z.string().trim().nullable().default(null),
   location: optionalText(80),
   experienceYears: optionalText(12),
@@ -169,7 +170,7 @@ export const projectSchema = z.object({
     .nullable()
     .default(null),
   description: optionalText(1500),
-  imageUrl: optionalUrl,
+  imageUrl: optionalImageSrc,
   imagePublicId: z.string().trim().nullable().default(null),
   tech: textList(40),
   demoUrl: optionalUrl,

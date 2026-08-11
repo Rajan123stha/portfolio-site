@@ -5,37 +5,39 @@ import { ADMIN_NAV } from "@/components/admin/nav-config";
 import { PageHeader } from "@/components/admin/page-header";
 import { requireAdmin } from "@/lib/auth/guard";
 import { getDashboardStats, getFallbackAreas } from "@/lib/queries/admin";
+import { getAnalyticsSummary } from "@/lib/queries/analytics";
 import { resolveIcon } from "@/lib/design-tokens";
 
 export const metadata = { title: "Dashboard" };
 
 export default async function DashboardPage() {
-  const [admin, stats, fallbackAreas] = await Promise.all([
+  const [admin, stats, fallbackAreas, traffic] = await Promise.all([
     requireAdmin(),
     getDashboardStats(),
     getFallbackAreas(),
+    // Never let an analytics hiccup take down the whole dashboard.
+    getAnalyticsSummary().catch(() => null),
   ]);
 
   const firstName = admin.name.split(" ")[0];
 
+  /**
+   * Traffic leads, because it's the number that changes daily and the reason to
+   * open this page at all. Content counts follow — they only move when you
+   * change them yourself.
+   */
   const cards = [
     {
-      label: "Projects",
-      value: stats.projects,
-      detail: `${stats.liveProjects} live`,
-      href: "/admin/projects",
+      label: "Views today",
+      value: traffic?.viewsToday ?? 0,
+      detail: `${traffic?.visitorsToday ?? 0} visitor${traffic?.visitorsToday === 1 ? "" : "s"}`,
+      href: "/admin/analytics",
     },
     {
-      label: "Roles",
-      value: stats.experiences,
-      detail: "in your timeline",
-      href: "/admin/experience",
-    },
-    {
-      label: "Skill groups",
-      value: stats.skillGroups,
-      detail: "on the skills grid",
-      href: "/admin/skills",
+      label: "Views · 7 days",
+      value: traffic?.views7d ?? 0,
+      detail: `${traffic?.visitors7d ?? 0} unique`,
+      href: "/admin/analytics",
     },
     {
       label: "Unread messages",
@@ -43,6 +45,12 @@ export default async function DashboardPage() {
       detail: stats.unreadMessages === 1 ? "enquiry waiting" : "enquiries waiting",
       href: "/admin/messages",
       highlight: stats.unreadMessages > 0,
+    },
+    {
+      label: "Projects",
+      value: stats.projects,
+      detail: `${stats.liveProjects} live`,
+      href: "/admin/projects",
     },
   ];
 

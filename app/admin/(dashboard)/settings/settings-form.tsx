@@ -163,6 +163,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings | null }) {
               addLabel="Add keyword"
               values={field.value ?? []}
               onChange={field.onChange}
+              error={errors.metaKeywords?.message}
             />
           )}
         />

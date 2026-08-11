@@ -121,6 +121,18 @@ remove a section for good, switch it off under **Section headers** — visibilit
 always wins over the fallback. The admin dashboard flags which areas are still
 showing bundled content.
 
+**Analytics are first-party.** `/api/track` records page views into your own
+Postgres; the dashboard reads them directly. Google Analytics can still run
+alongside it (Settings & SEO), but reading GA's numbers back out needs the Data
+API and a service account, and the data never reaches the admin panel.
+
+Nothing identifying is stored — no IP, no cookie, no fingerprint. Unique
+visitors are counted with an HMAC of IP + user-agent keyed with a salt that
+**rotates daily**, so counts are accurate within a day and the same person is
+unlinkable across days. Referrers are reduced to the bare host (`google.com`,
+never the search query), obvious bots are dropped, `Do Not Track` is honoured,
+and `/admin` traffic is excluded so your own sessions don't distort the figures.
+
 **Two read layers.** The public site reads through `unstable_cache` and is
 invalidated by tag when the admin saves, so a warm request never touches
 Postgres. The admin reads directly — an editor must see hidden rows and their
