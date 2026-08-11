@@ -21,6 +21,12 @@ type ImageFieldProps = {
   onChange: (next: { url: string | null; publicId: string | null }) => void;
   /** Preview aspect ratio; portraits for avatars, landscape for screenshots. */
   aspect?: "square" | "video";
+  /**
+   * Validation message for the underlying field. Without this the picker was
+   * the one control in the panel that could hold an invalid value and say
+   * nothing about it, which turned a rejected save into a dead button.
+   */
+  error?: string;
 };
 
 type CloudinaryUploadResponse = {
@@ -50,6 +56,7 @@ export function ImageField({
   publicId,
   onChange,
   aspect = "video",
+  error,
 }: ImageFieldProps) {
   const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -158,8 +165,15 @@ export function ImageField({
             }
             placeholder="https://… or /image/example.png"
             aria-label={`${label} URL`}
+            aria-invalid={Boolean(error)}
             className={inputClass}
           />
+
+          {error ? (
+            <p role="alert" className="text-xs font-medium text-destructive">
+              {error}
+            </p>
+          ) : null}
 
           <div className="flex flex-wrap gap-2">
             <input

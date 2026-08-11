@@ -1,6 +1,7 @@
 import Script from "next/script";
 
 import CustomCursor from "@/components/customcursor";
+import { AnalyticsBeacon } from "@/components/layout/analytics-beacon";
 import { MotionProvider } from "@/components/layout/motion-provider";
 import { getSiteSettings } from "@/lib/queries/public";
 
@@ -37,6 +38,13 @@ export default async function SiteLayout({
           }
         `}</style>
       </noscript>
+
+      {/*
+        Mounted here rather than in the root layout so it only ever sees public
+        traffic — the owner's own admin sessions would otherwise dominate every
+        figure on the analytics dashboard.
+      */}
+      <AnalyticsBeacon />
 
       <MotionProvider>
         <CustomCursor />

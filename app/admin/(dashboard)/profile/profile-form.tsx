@@ -226,12 +226,24 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
           <ul className="space-y-2">
             {words.fields.map((field, index) => (
               <li key={field.id} className="flex gap-2">
-                <input
-                  {...register(`typewriterWords.${index}.text`)}
-                  className={inputClass}
-                  placeholder="Build."
-                  aria-label={`Word ${index + 1}`}
-                />
+                <div className="flex-1 space-y-1">
+                  <input
+                    {...register(`typewriterWords.${index}.text`)}
+                    className={inputClass}
+                    placeholder="Build."
+                    aria-label={`Word ${index + 1}`}
+                    aria-invalid={Boolean(
+                      errors.typewriterWords?.[index]?.text,
+                    )}
+                  />
+                  {/* A blank word fails the schema; without this the save
+                      would fail with nothing on screen to explain why. */}
+                  {errors.typewriterWords?.[index]?.text?.message ? (
+                    <p role="alert" className="text-xs font-medium text-destructive">
+                      {errors.typewriterWords[index]?.text?.message}
+                    </p>
+                  ) : null}
+                </div>
                 <Button
                   type="button"
                   variant="ghost"
@@ -272,6 +284,7 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
               label="Portrait"
               hint="Not shown on the page — the hero uses a code card instead. Used as the social share image when no dedicated one is set under Settings & SEO."
               aspect="square"
+              error={errors.avatarUrl?.message}
               value={field.value ?? null}
               publicId={watch("avatarPublicId") ?? null}
               onChange={({ url, publicId }) => {
@@ -314,12 +327,20 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
                 className="space-y-3 rounded-xl border border-border p-4"
               >
                 <div className="flex gap-2">
-                  <input
-                    {...register(`heroBadges.${index}.label`)}
-                    className={inputClass}
-                    placeholder="React"
-                    aria-label={`Stack item ${index + 1}`}
-                  />
+                  <div className="flex-1 space-y-1">
+                    <input
+                      {...register(`heroBadges.${index}.label`)}
+                      className={inputClass}
+                      placeholder="React"
+                      aria-label={`Stack item ${index + 1}`}
+                      aria-invalid={Boolean(errors.heroBadges?.[index]?.label)}
+                    />
+                    {errors.heroBadges?.[index]?.label?.message ? (
+                      <p role="alert" className="text-xs font-medium text-destructive">
+                        {errors.heroBadges[index]?.label?.message}
+                      </p>
+                    ) : null}
+                  </div>
                   {/*
                     `position` is still stored, but the hero no longer floats
                     these around a portrait, so there is nothing for the control

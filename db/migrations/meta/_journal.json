@@ -8,6 +8,13 @@
       "when": 1785842279272,
       "tag": "0000_fearless_the_captain",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786430674497,
+      "tag": "0001_lovely_the_call",
+      "breakpoints": true
     }
   ]
 }

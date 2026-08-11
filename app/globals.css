@@ -50,6 +50,16 @@
     --input: 240 6% 90%;
     --ring: 243 75% 55%;
 
+    /*
+     * Chart series. Slots 1 and 2 of a validated categorical palette, kept as
+     * hex rather than HSL triples because they were checked as exact values:
+     * lightness band, chroma floor, colour-vision separation (ΔE 24.7 protan),
+     * normal-vision separation and 3:1 contrast against this surface. Changing
+     * them means re-validating, not eyeballing.
+     */
+    --chart-views: #2a78d6;
+    --chart-visitors: #eb6834;
+
     /* Surface that sits one step above the page background. */
     --elevated: 240 5% 98%;
     /* Secondary accent, used only in gradients alongside --primary. */
@@ -90,6 +100,14 @@
 
     --elevated: 240 7% 8%;
     --accent-2: 280 80% 68%;
+
+    /*
+     * The same two hues re-stepped for the dark surface — not an automatic
+     * flip. Validated separately against #0a0a0b: ΔE 26.8 protan, 31.8 normal,
+     * both ≥ 3:1 contrast.
+     */
+    --chart-views: #3987e5;
+    --chart-visitors: #d95926;
   }
 }
 

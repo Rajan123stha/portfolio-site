@@ -187,6 +187,7 @@ export function ProjectForm({
             <ImageField
               label="Cover image"
               hint="Landscape screenshots look best — the card crops to 16:9."
+              error={errors.imageUrl?.message}
               value={field.value ?? null}
               publicId={watch("imagePublicId") ?? null}
               onChange={({ url, publicId }) => {

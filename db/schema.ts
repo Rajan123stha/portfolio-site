@@ -370,6 +370,62 @@ export const messages = pgTable("messages", {
   index("messages_unread_idx").on(table.isRead, table.isArchived),
 ]);
 
+// ── Analytics ────────────────────────────────────────────────────────────────
+
+export const deviceType = pgEnum("device_type", [
+  "desktop",
+  "mobile",
+  "tablet",
+  "unknown",
+]);
+
+/**
+ * First-party page views.
+ *
+ * Deliberately not Google Analytics: reading GA numbers back out requires the
+ * Data API, a service account and a property id, and the data then lives
+ * somewhere the admin panel can't reach. Writing here means the dashboard can
+ * query it directly, and the numbers belong to the site's owner.
+ *
+ * Nothing personally identifying is stored. No IP address, no cookie, no
+ * device fingerprint — only `visitor_hash`, described below.
+ */
+export const pageViews = pgTable("page_views", {
+  id: uuid("id").primaryKey().defaultRandom(),
+
+  path: text("path").notNull(),
+
+  /**
+   * Referrer host only ("google.com"), never the full URL — the path of the
+   * page someone arrived from can itself be sensitive. `null` means direct.
+   */
+  referrerHost: text("referrer_host"),
+
+  /** Two-letter country code, when the platform provides one. */
+  country: text("country"),
+
+  device: deviceType("device").notNull().default("unknown"),
+
+  /**
+   * HMAC of (IP + user-agent) keyed with a salt that **rotates daily**.
+   *
+   * That rotation is the entire point: it makes unique-visitor counts possible
+   * within a day while making the same person unlinkable across days, so no
+   * long-lived identifier for a real individual is ever stored.
+   */
+  visitorHash: text("visitor_hash").notNull(),
+
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+}, (table) => [
+  index("page_views_created_idx").on(table.createdAt.desc()),
+  index("page_views_visitor_idx").on(table.visitorHash, table.createdAt),
+  index("page_views_path_idx").on(table.path),
+]);
+
+export type PageView = typeof pageViews.$inferSelect;
+
 // ── Media library ────────────────────────────────────────────────────────────
 
 export const media = pgTable("media", {
