@@ -21,9 +21,14 @@ const SECTION_META: Record<
     description: "Heading above your intro paragraphs and core stack.",
     anchor: "#about",
   },
+  services: {
+    title: "What I offer",
+    description: "Heading above the services grid.",
+    anchor: "#services",
+  },
   skills: {
     title: "Skills",
-    description: "Heading above the proficiency grid.",
+    description: "Heading above the skills grid.",
     anchor: "#skills",
   },
   experience: {

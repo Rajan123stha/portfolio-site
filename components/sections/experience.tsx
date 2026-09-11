@@ -34,7 +34,8 @@ export function Experience({ section, experiences, index }: ExperienceProps) {
           {experiences.map((experience, i) => (
             <motion.li
               key={experience.id}
-              className="group relative grid gap-4 pb-10 md:grid-cols-[180px_1fr] md:gap-10"
+              id={`experience-${experience.id}`}
+              className="group relative grid scroll-mt-28 gap-4 rounded-2xl pb-10 md:grid-cols-[180px_1fr] md:gap-10"
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}

@@ -6,6 +6,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -86,6 +87,22 @@ export const siteSettings = pgTable("site_settings", {
   // Integrations
   gaMeasurementId: text("ga_measurement_id"),
 
+  // AI assistant — the "Ask about me" chat on the public site. Off until the
+  // owner switches it on, because it also needs an API key to be configured.
+  assistantEnabled: boolean("assistant_enabled").notNull().default(false),
+  /** Opening line of the chat. Blank uses a generated greeting. */
+  assistantWelcome: text("assistant_welcome").notNull().default(""),
+  /** Suggested questions; `{name}` expands to the first name. Empty = defaults. */
+  assistantQuestions: jsonb("assistant_questions")
+    .$type<string[]>()
+    .notNull()
+    .default([]),
+  /**
+   * How the assistant refers to the owner ("he/him", "she/her", "they/them").
+   * Blank makes it use the first name rather than guess.
+   */
+  assistantPronouns: text("assistant_pronouns").notNull().default(""),
+
   ...timestamps,
 }, (table) => [
   check("site_settings_singleton", sql`${table.id} = 1`),
@@ -152,6 +169,7 @@ export const profile = pgTable("profile", {
 export const sectionKey = pgEnum("section_key", [
   "hero",
   "about",
+  "services",
   "skills",
   "experience",
   "projects",
@@ -188,23 +206,6 @@ export const coreStackItems = pgTable("core_stack_items", {
 
 // ── Skills ───────────────────────────────────────────────────────────────────
 
-/**
- * Proficiency tiers are data rather than an enum so the legend, ordering and
- * bar widths stay editable without a migration.
- */
-export const skillLevels = pgTable("skill_levels", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  label: text("label").notNull(),
-  /** Bar fill, 0–100. */
-  percent: integer("percent").notNull(),
-  color: text("color").$type<ColorToken>().notNull(),
-  sortOrder: integer("sort_order").notNull().default(0),
-  ...timestamps,
-}, (table) => [
-  uniqueIndex("skill_levels_label_key").on(table.label),
-  check("skill_levels_percent_range", sql`${table.percent} between 0 and 100`),
-]);
-
 export const skillGroups = pgTable("skill_groups", {
   id: uuid("id").primaryKey().defaultRandom(),
   icon: text("icon").$type<IconName>().notNull(),
@@ -221,14 +222,39 @@ export const skills = pgTable("skills", {
   groupId: uuid("group_id")
     .notNull()
     .references(() => skillGroups.id, { onDelete: "cascade" }),
-  levelId: uuid("level_id")
-    .notNull()
-    .references(() => skillLevels.id, { onDelete: "restrict" }),
   name: text("name").notNull(),
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps,
 }, (table) => [
   index("skills_group_idx").on(table.groupId, table.sortOrder),
+]);
+
+// ── Services ("what I offer") ────────────────────────────────────────────────
+
+/**
+ * Offerings pitched to a prospective client — website build, mobile app,
+ * internal system, and so on.
+ *
+ * Separate from `skills` on purpose. Skills answer "what does this person
+ * know"; services answer "what can I buy from them", which is the question a
+ * hiring manager or client actually arrives with. They read differently and
+ * belong in different sections.
+ */
+export const services = pgTable("services", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  icon: text("icon").$type<IconName>().notNull(),
+  title: text("title").notNull(),
+  summary: text("summary").notNull().default(""),
+  /** Concrete deliverables. Ordered strings with no identity of their own. */
+  deliverables: jsonb("deliverables").$type<string[]>().notNull().default([]),
+  /** Optional lead-time or starting-price note, e.g. "From 2 weeks". */
+  note: text("note"),
+  featured: boolean("featured").notNull().default(false),
+  sortOrder: integer("sort_order").notNull().default(0),
+  visible: boolean("visible").notNull().default(true),
+  ...timestamps,
+}, (table) => [
+  index("services_order_idx").on(table.sortOrder),
 ]);
 
 // ── Experience ───────────────────────────────────────────────────────────────
@@ -426,6 +452,51 @@ export const pageViews = pgTable("page_views", {
 
 export type PageView = typeof pageViews.$inferSelect;
 
+// ── AI assistant ─────────────────────────────────────────────────────────────
+
+/**
+ * Fixed-window hit counters for the public assistant.
+ *
+ * Every answer costs a call against a provider quota, so an unauthenticated
+ * endpoint needs a ceiling per visitor and a ceiling overall. Counters rather
+ * than one row per request: a single upsert both records the hit and returns
+ * the running total, so enforcing the limit costs one round-trip.
+ *
+ * `bucket` is an opaque key such as `v:<hmac>:hour` or `all:day`. Visitor
+ * keys are HMACs of the IP, never the address itself.
+ */
+export const assistantRateLimits = pgTable("assistant_rate_limits", {
+  bucket: text("bucket").notNull(),
+  windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+  hits: integer("hits").notNull().default(0),
+}, (table) => [
+  primaryKey({ columns: [table.bucket, table.windowStart] }),
+  // Expired windows are purged by age.
+  index("assistant_rate_limits_window_idx").on(table.windowStart),
+]);
+
+/**
+ * Answers to the *suggested* questions, reused across visitors.
+ *
+ * Most first questions are a tap on a suggestion, so the same few prompts
+ * arrive over and over; serving a stored answer costs no provider tokens.
+ * Only suggestion questions are cached — never text a visitor typed — so no
+ * visitor-authored content is ever stored here.
+ *
+ * `key` hashes the model, the full system prompt and the question, so any CMS
+ * edit produces new keys and stale answers simply stop being found.
+ */
+export const assistantAnswerCache = pgTable("assistant_answer_cache", {
+  key: text("key").primaryKey(),
+  /** Raw model output, citation markers included; re-verified on every replay. */
+  answer: text("answer").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+}, (table) => [
+  index("assistant_answer_cache_created_idx").on(table.createdAt),
+]);
+
 // ── Media library ────────────────────────────────────────────────────────────
 
 export const media = pgTable("media", {
@@ -456,14 +527,6 @@ export const skillsRelations = relations(skills, ({ one }) => ({
     fields: [skills.groupId],
     references: [skillGroups.id],
   }),
-  level: one(skillLevels, {
-    fields: [skills.levelId],
-    references: [skillLevels.id],
-  }),
-}));
-
-export const skillLevelsRelations = relations(skillLevels, ({ many }) => ({
-  skills: many(skills),
 }));
 
 export const projectsRelations = relations(projects, ({ one }) => ({
@@ -498,9 +561,9 @@ export type Profile = typeof profile.$inferSelect;
 export type Section = typeof sections.$inferSelect;
 export type SectionKey = (typeof sectionKey.enumValues)[number];
 export type CoreStackItem = typeof coreStackItems.$inferSelect;
-export type SkillLevel = typeof skillLevels.$inferSelect;
 export type SkillGroup = typeof skillGroups.$inferSelect;
 export type Skill = typeof skills.$inferSelect;
+export type Service = typeof services.$inferSelect;
 export type Experience = typeof experiences.$inferSelect;
 export type ProjectCategory = typeof projectCategories.$inferSelect;
 export type Project = typeof projects.$inferSelect;

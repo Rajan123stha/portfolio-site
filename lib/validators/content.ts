@@ -108,18 +108,6 @@ export type CoreStackItemInput = z.input<typeof coreStackItemSchema>;
 
 // ── Skills ───────────────────────────────────────────────────────────────────
 
-export const skillLevelSchema = z.object({
-  label: requiredText("Level name", 32),
-  percent: z.coerce
-    .number()
-    .int("Use a whole number")
-    .min(0, "0 or higher")
-    .max(100, "100 or lower"),
-  color: colorToken,
-});
-
-export type SkillLevelInput = z.input<typeof skillLevelSchema>;
-
 export const skillGroupSchema = z.object({
   icon: iconName,
   label: requiredText("Kicker", 40),
@@ -131,11 +119,24 @@ export type SkillGroupInput = z.input<typeof skillGroupSchema>;
 
 export const skillSchema = z.object({
   groupId: uuid,
-  levelId: uuid,
   name: requiredText("Skill name", 60),
 });
 
 export type SkillInput = z.input<typeof skillSchema>;
+
+// ── Services ─────────────────────────────────────────────────────────────────
+
+export const serviceSchema = z.object({
+  icon: iconName,
+  title: requiredText("Title", 80),
+  summary: optionalText(400),
+  deliverables: textList(160),
+  note: optionalText(60).transform((v) => v || null),
+  featured: z.boolean().default(false),
+  visible: z.boolean().default(true),
+});
+
+export type ServiceInput = z.input<typeof serviceSchema>;
 
 // ── Experience ───────────────────────────────────────────────────────────────
 
@@ -244,3 +245,19 @@ export const mediaSchema = z.object({
 });
 
 export type MediaInput = z.input<typeof mediaSchema>;
+
+// ── AI assistant ─────────────────────────────────────────────────────────────
+
+/** Mirrors `MAX_ASSISTANT_QUESTIONS`; kept literal so this module stays import-light. */
+const ASSISTANT_QUESTION_LIMIT = 8;
+
+export const assistantSettingsSchema = z.object({
+  assistantWelcome: optionalText(300),
+  assistantPronouns: optionalText(40),
+  assistantQuestions: textList(140).refine(
+    (questions) => questions.length <= ASSISTANT_QUESTION_LIMIT,
+    `Up to ${ASSISTANT_QUESTION_LIMIT} questions — the chat shows them as one-tap suggestions`,
+  ),
+});
+
+export type AssistantSettingsInput = z.input<typeof assistantSettingsSchema>;

@@ -15,6 +15,34 @@
       "when": 1786430674497,
       "tag": "0001_lovely_the_call",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789018340984,
+      "tag": "0002_drop_skill_levels",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789018363055,
+      "tag": "0003_add_services",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789110865706,
+      "tag": "0004_ai_assistant",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789116012738,
+      "tag": "0005_assistant_answer_cache",
+      "breakpoints": true
     }
   ]
 }

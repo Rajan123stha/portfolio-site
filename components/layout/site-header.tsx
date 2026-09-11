@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
@@ -34,6 +34,10 @@ export function SiteHeader({
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const openButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
 
   const items = useMemo(
     () => navItems.filter((item) => item.showInHeader),
@@ -98,6 +102,18 @@ export function SiteHeader({
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
+
+  /*
+   * The drawer declares `aria-modal`, so focus has to travel with it —
+   * otherwise it stays on the hamburger, which the panel now covers, and a
+   * keyboard user is left tabbing through content hidden behind the overlay.
+   * `wasOpen` keeps the closing branch from stealing focus on first paint.
+   */
+  useEffect(() => {
+    if (mobileOpen) closeButtonRef.current?.focus();
+    else if (wasOpen.current) openButtonRef.current?.focus();
+    wasOpen.current = mobileOpen;
   }, [mobileOpen]);
 
   return (
@@ -206,6 +222,7 @@ export function SiteHeader({
             <ThemeToggle />
 
             <button
+              ref={openButtonRef}
               type="button"
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:text-foreground md:hidden"
               onClick={() => setMobileOpen((open) => !open)}
@@ -235,16 +252,48 @@ export function SiteHeader({
               onClick={() => setMobileOpen(false)}
             />
 
+            {/*
+              Full height and above the backdrop, unlike the previous panel.
+              It used to start below the header at `top-16` and share `z-40`
+              with the backdrop — and because the backdrop renders later, it
+              painted over the header, burying the only close button on the
+              page. The drawer now owns its own dismiss control instead of
+              depending on a button it covers up.
+            */}
             <motion.div
               id="mobile-nav"
-              className="fixed right-0 top-16 z-40 flex h-[calc(100dvh-4rem)] w-full max-w-xs flex-col border-l border-border bg-background md:hidden"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Site menu"
+              className="fixed inset-y-0 right-0 z-50 flex h-[100dvh] w-full max-w-xs flex-col border-l border-border bg-background md:hidden"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 320, damping: 34 }}
             >
-              <nav aria-label="Mobile" className="flex flex-col gap-1 p-6">
-                <p className="label-mono mb-3 text-muted-foreground">Menu</p>
+              <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-6">
+                <p className="label-mono text-muted-foreground">Menu</p>
+
+                <button
+                  ref={closeButtonRef}
+                  type="button"
+                  onClick={() => setMobileOpen(false)}
+                  aria-label="Close menu"
+                  /*
+                    40px square: comfortably above the ~44px touch guideline
+                    once the surrounding row padding is counted, and -mr-2 pulls
+                    it back so the visible edge lines up with the row content.
+                  */
+                  className="-mr-2 flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                >
+                  <X aria-hidden className="h-4 w-4" />
+                </button>
+              </div>
+
+              <nav
+                aria-label="Mobile"
+                className="flex flex-1 flex-col gap-1 overflow-y-auto p-6"
+              >
 
                 {items.map((item, index) => {
                   const isActive = item.href === `#${active}`;

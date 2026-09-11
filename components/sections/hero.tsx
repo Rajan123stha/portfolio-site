@@ -48,7 +48,10 @@ export function Hero({ profile, tech }: HeroProps) {
   } = profile;
 
   return (
-    <section className="relative overflow-hidden pb-12 pt-14 md:pb-16 md:pt-20">
+    <section
+      id="intro"
+      className="relative scroll-mt-24 overflow-hidden pb-12 pt-14 md:pb-16 md:pt-20"
+    >
       {/*
         Blueprint grid + accent blooms.
         `z-0`, not `-z-10`: the site wrapper paints `bg-background`, so a

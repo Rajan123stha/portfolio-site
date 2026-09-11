@@ -77,7 +77,7 @@ Public site at `/`, admin at `/admin`.
 
 ```
 db/
-  schema.ts          19 tables — the single source of truth
+  schema.ts          20 tables — the single source of truth
   migrations/        generated SQL, committed
   seed.ts            bootstraps content; safe to re-run
 lib/
@@ -164,3 +164,16 @@ domain so Open Graph URLs resolve correctly.
 Run `pnpm db:migrate` against production once before the first deploy.
 `ADMIN_EMAIL` / `ADMIN_PASSWORD` are only read by the seed script — leave them
 out of the deployed environment once the account exists.
+
+## AI assistant
+
+The public "Ask about me" chat answers only from published content, cites a
+source for every claim and flags details it can't verify. It stays hidden until
+a provider key is set (`AI_PROVIDER`, `AI_API_KEY` — Gemini's free tier works)
+and it's switched on under **Admin → AI assistant**.
+
+Because it's a public endpoint that spends a quota, it sits behind layered
+limits: per-visitor and site-wide rate limits, a daily token budget, cached
+answers for suggested questions, and an optional Cloudflare Turnstile bot
+check. **Before going live, read [`docs/ai-assistant-security.md`](docs/ai-assistant-security.md)**
+— it has the production checklist and a command to test each safeguard.
