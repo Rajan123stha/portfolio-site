@@ -245,3 +245,19 @@ export const mediaSchema = z.object({
 });
 
 export type MediaInput = z.input<typeof mediaSchema>;
+
+// ── AI assistant ─────────────────────────────────────────────────────────────
+
+/** Mirrors `MAX_ASSISTANT_QUESTIONS`; kept literal so this module stays import-light. */
+const ASSISTANT_QUESTION_LIMIT = 8;
+
+export const assistantSettingsSchema = z.object({
+  assistantWelcome: optionalText(300),
+  assistantPronouns: optionalText(40),
+  assistantQuestions: textList(140).refine(
+    (questions) => questions.length <= ASSISTANT_QUESTION_LIMIT,
+    `Up to ${ASSISTANT_QUESTION_LIMIT} questions — the chat shows them as one-tap suggestions`,
+  ),
+});
+
+export type AssistantSettingsInput = z.input<typeof assistantSettingsSchema>;

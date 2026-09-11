@@ -6,6 +6,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -85,6 +86,22 @@ export const siteSettings = pgTable("site_settings", {
 
   // Integrations
   gaMeasurementId: text("ga_measurement_id"),
+
+  // AI assistant — the "Ask about me" chat on the public site. Off until the
+  // owner switches it on, because it also needs an API key to be configured.
+  assistantEnabled: boolean("assistant_enabled").notNull().default(false),
+  /** Opening line of the chat. Blank uses a generated greeting. */
+  assistantWelcome: text("assistant_welcome").notNull().default(""),
+  /** Suggested questions; `{name}` expands to the first name. Empty = defaults. */
+  assistantQuestions: jsonb("assistant_questions")
+    .$type<string[]>()
+    .notNull()
+    .default([]),
+  /**
+   * How the assistant refers to the owner ("he/him", "she/her", "they/them").
+   * Blank makes it use the first name rather than guess.
+   */
+  assistantPronouns: text("assistant_pronouns").notNull().default(""),
 
   ...timestamps,
 }, (table) => [
@@ -434,6 +451,51 @@ export const pageViews = pgTable("page_views", {
 ]);
 
 export type PageView = typeof pageViews.$inferSelect;
+
+// ── AI assistant ─────────────────────────────────────────────────────────────
+
+/**
+ * Fixed-window hit counters for the public assistant.
+ *
+ * Every answer costs a call against a provider quota, so an unauthenticated
+ * endpoint needs a ceiling per visitor and a ceiling overall. Counters rather
+ * than one row per request: a single upsert both records the hit and returns
+ * the running total, so enforcing the limit costs one round-trip.
+ *
+ * `bucket` is an opaque key such as `v:<hmac>:hour` or `all:day`. Visitor
+ * keys are HMACs of the IP, never the address itself.
+ */
+export const assistantRateLimits = pgTable("assistant_rate_limits", {
+  bucket: text("bucket").notNull(),
+  windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+  hits: integer("hits").notNull().default(0),
+}, (table) => [
+  primaryKey({ columns: [table.bucket, table.windowStart] }),
+  // Expired windows are purged by age.
+  index("assistant_rate_limits_window_idx").on(table.windowStart),
+]);
+
+/**
+ * Answers to the *suggested* questions, reused across visitors.
+ *
+ * Most first questions are a tap on a suggestion, so the same few prompts
+ * arrive over and over; serving a stored answer costs no provider tokens.
+ * Only suggestion questions are cached — never text a visitor typed — so no
+ * visitor-authored content is ever stored here.
+ *
+ * `key` hashes the model, the full system prompt and the question, so any CMS
+ * edit produces new keys and stale answers simply stop being found.
+ */
+export const assistantAnswerCache = pgTable("assistant_answer_cache", {
+  key: text("key").primaryKey(),
+  /** Raw model output, citation markers included; re-verified on every replay. */
+  answer: text("answer").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+}, (table) => [
+  index("assistant_answer_cache_created_idx").on(table.createdAt),
+]);
 
 // ── Media library ────────────────────────────────────────────────────────────
 
