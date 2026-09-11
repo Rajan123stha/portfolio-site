@@ -107,6 +107,12 @@ export const ADMIN_NAV: AdminNavGroup[] = [
         description: "Uploaded images",
       },
       {
+        href: "/admin/assistant",
+        label: "AI assistant",
+        icon: "Brain",
+        description: "The Ask-about-me chat and what it knows",
+      },
+      {
         href: "/admin/settings",
         label: "Settings & SEO",
         icon: "Wrench",

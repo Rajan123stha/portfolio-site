@@ -1,3 +1,4 @@
+import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { ScrollProgress } from "@/components/layout/scroll-progress";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -9,6 +10,14 @@ import { Projects } from "@/components/sections/projects";
 import { Services } from "@/components/sections/services";
 import { Skills } from "@/components/sections/skills";
 import { Value } from "@/components/sections/value";
+import {
+  ASSISTANT_LIMITS,
+  getTurnstileConfig,
+  isAssistantConfigured,
+} from "@/lib/assistant/config";
+import { buildKnowledge } from "@/lib/assistant/knowledge";
+import { defaultWelcome, resolveQuestions } from "@/lib/assistant/suggestions";
+import { sectionVisibility } from "@/lib/content/visibility";
 import { getPortfolio, getSiteSettings } from "@/lib/queries/public";
 
 /**
@@ -48,20 +57,20 @@ export default async function PortfolioPage() {
   let counter = 0;
   const nextIndex = () => (counter += 1);
 
-  const show = {
-    about: sections.about.visible,
-    services: sections.services.visible && data.services.length > 0,
-    skills: sections.skills.visible && data.skillGroups.length > 0,
-    experience: sections.experience.visible && data.experiences.length > 0,
-    projects: sections.projects.visible && data.projects.length > 0,
-    value: sections.value.visible && data.highlightGroups.length > 0,
-    contact: sections.contact.visible,
-  };
+  const show = sectionVisibility(data);
 
   /** Flattened skill names, feeding the hero's marquee strip. */
   const tech = data.skillGroups.flatMap((group) =>
     group.skills.map((skill) => skill.name),
   );
+
+  /**
+   * The assistant renders only when it's switched on *and* a provider key
+   * exists, so enabling it before configuring a key can't ship a dead button.
+   */
+  const assistant =
+    settings.assistantEnabled && isAssistantConfigured() ? buildKnowledge(data) : null;
+  const assistantName = assistant?.owner.firstName ?? "";
 
   return (
     <>
@@ -76,7 +85,7 @@ export default async function PortfolioPage() {
       />
 
       <main>
-        {sections.hero.visible ? (
+        {show.hero ? (
           <Hero profile={profile} section={sections.hero} tech={tech} />
         ) : null}
 
@@ -145,6 +154,25 @@ export default async function PortfolioPage() {
         socialLinks={data.socialLinks}
         year={new Date().getFullYear()}
       />
+
+      {assistant ? (
+        <AssistantWidget
+          firstName={assistantName}
+          avatarUrl={profile.avatarUrl}
+          availability={
+            show.hero && profile.availabilityVisible && profile.availabilityLabel
+              ? profile.availabilityLabel
+              : null
+          }
+          welcome={settings.assistantWelcome || defaultWelcome(assistantName)}
+          questions={resolveQuestions(settings.assistantQuestions, assistantName)}
+          links={assistant.links}
+          factCount={assistant.facts.length}
+          turnLimit={ASSISTANT_LIMITS.turnsPerConversation}
+          // The site key is public by design; the secret stays on the server.
+          turnstileSiteKey={getTurnstileConfig()?.siteKey ?? null}
+        />
+      ) : null}
     </>
   );
 }

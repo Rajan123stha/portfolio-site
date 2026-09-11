@@ -56,6 +56,11 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsView = {
   ],
   ogImageUrl: null,
   gaMeasurementId: null,
+  // The assistant stays off until the owner enables it in the CMS.
+  assistantEnabled: false,
+  assistantWelcome: "",
+  assistantQuestions: [],
+  assistantPronouns: "",
 };
 
 // ── Profile ──────────────────────────────────────────────────────────────────

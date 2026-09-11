@@ -122,6 +122,8 @@ export function Projects({
             {filtered.map((project, i) => (
               <motion.div
                 key={project.id}
+                id={`project-${project.slug}`}
+                className="scroll-mt-28 rounded-2xl"
                 layout
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

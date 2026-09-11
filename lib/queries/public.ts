@@ -75,6 +75,10 @@ const fetchSiteSettings = unstable_cache(
         metaKeywords: siteSettings.metaKeywords,
         ogImageUrl: siteSettings.ogImageUrl,
         gaMeasurementId: siteSettings.gaMeasurementId,
+        assistantEnabled: siteSettings.assistantEnabled,
+        assistantWelcome: siteSettings.assistantWelcome,
+        assistantQuestions: siteSettings.assistantQuestions,
+        assistantPronouns: siteSettings.assistantPronouns,
       })
       .from(siteSettings)
       .where(eq(siteSettings.id, 1))
