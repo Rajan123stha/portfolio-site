@@ -161,6 +161,15 @@ async function seedSections() {
       note: null,
     },
     {
+      key: "services" as const,
+      eyebrow: "What I Offer",
+      heading: "What you get when",
+      headingAccent: "we work together",
+      subheading:
+        "From a single landing page to a full internal system — here is what I take on, and what is included.",
+      note: null,
+    },
+    {
       key: "skills" as const,
       eyebrow: "Expertise",
       heading: "My Skills",
@@ -227,24 +236,7 @@ async function seedCoreStack() {
 }
 
 async function seedSkills() {
-  if (!(await isEmpty(schema.skillLevels))) return log("· skills — already populated");
-
-  const levels = await db
-    .insert(schema.skillLevels)
-    .values(
-      ordered([
-        { label: "Expert", percent: 100, color: "primary" as const },
-        { label: "Advanced", percent: 80, color: "primaryStrong" as const },
-        { label: "Intermediate", percent: 62, color: "primarySoft" as const },
-      ]),
-    )
-    .returning({ id: schema.skillLevels.id, label: schema.skillLevels.label });
-
-  const levelId = (label: string) => {
-    const match = levels.find((level) => level.label === label);
-    if (!match) throw new Error(`Seed error: missing skill level "${label}"`);
-    return match.id;
-  };
+  if (!(await isEmpty(schema.skillGroups))) return log("· skills — already populated");
 
   const groups = await db
     .insert(schema.skillGroups)
@@ -267,24 +259,82 @@ async function seedSkills() {
 
   await db.insert(schema.skills).values(
     ordered([
-      { groupId: dev, name: "React", levelId: levelId("Expert") },
-      { groupId: dev, name: "TypeScript", levelId: levelId("Intermediate") },
-      { groupId: dev, name: "Tailwind CSS", levelId: levelId("Advanced") },
-      { groupId: dev, name: "Next.js", levelId: levelId("Advanced") },
-      { groupId: dev, name: "Node.js", levelId: levelId("Intermediate") },
-      { groupId: dev, name: "Express.js", levelId: levelId("Advanced") },
-      { groupId: dev, name: "Redux", levelId: levelId("Intermediate") },
-      { groupId: dev, name: "MongoDB", levelId: levelId("Intermediate") },
-      { groupId: tools, name: "UI/UX Design", levelId: levelId("Intermediate") },
-      { groupId: tools, name: "Figma", levelId: levelId("Intermediate") },
-      { groupId: tools, name: "WordPress", levelId: levelId("Advanced") },
-      { groupId: tools, name: "Wagtail / Payload CMS", levelId: levelId("Intermediate") },
-      { groupId: tools, name: "AWS", levelId: levelId("Intermediate") },
-      { groupId: tools, name: "Git / GitHub", levelId: levelId("Advanced") },
-      { groupId: tools, name: "Jest & Cypress", levelId: levelId("Intermediate") },
+      { groupId: dev, name: "React" },
+      { groupId: dev, name: "TypeScript" },
+      { groupId: dev, name: "Tailwind CSS" },
+      { groupId: dev, name: "Next.js" },
+      { groupId: dev, name: "Node.js" },
+      { groupId: dev, name: "Express.js" },
+      { groupId: dev, name: "Redux" },
+      { groupId: dev, name: "MongoDB" },
+      { groupId: tools, name: "UI/UX Design" },
+      { groupId: tools, name: "Figma" },
+      { groupId: tools, name: "WordPress" },
+      { groupId: tools, name: "Wagtail / Payload CMS" },
+      { groupId: tools, name: "AWS" },
+      { groupId: tools, name: "Git / GitHub" },
+      { groupId: tools, name: "Jest & Cypress" },
     ]),
   );
-  log("✓ skills (3 levels, 2 groups, 15 skills)");
+  log("✓ skills (2 groups, 15 skills)");
+}
+
+async function seedServices() {
+  if (!(await isEmpty(schema.services))) return log("· services — already populated");
+
+  await db.insert(schema.services).values(
+    ordered([
+      {
+        icon: "Monitor" as const,
+        title: "Website development",
+        summary:
+          "Marketing sites, landing pages and company websites built to load fast, rank well, and stay easy to update.",
+        deliverables: [
+          "Responsive design from mobile to desktop",
+          "CMS so you can edit content yourself",
+          "SEO, analytics and performance tuning",
+        ],
+        note: "From 2 weeks",
+        featured: true,
+      },
+      {
+        icon: "Smartphone" as const,
+        title: "Web & mobile apps",
+        summary:
+          "Product-style applications with authentication, dashboards and real data behind them — not just screens.",
+        deliverables: [
+          "React / Next.js frontend",
+          "REST or server-action APIs",
+          "Role-based auth and secure workflows",
+        ],
+        note: "From 4 weeks",
+      },
+      {
+        icon: "Boxes" as const,
+        title: "Internal systems",
+        summary:
+          "Admin panels and business tools that replace the spreadsheet — booking flows, inventory, enquiry pipelines.",
+        deliverables: [
+          "Custom admin dashboard",
+          "PostgreSQL data modelling",
+          "Reporting and exports",
+        ],
+      },
+      {
+        icon: "Cloud" as const,
+        title: "Deployment & maintenance",
+        summary:
+          "Getting it live on AWS or Vercel with SSL, CI and monitoring — then keeping it healthy.",
+        deliverables: [
+          "AWS S3 / CloudFront or Vercel setup",
+          "Custom domain and SSL",
+          "Ongoing fixes and improvements",
+        ],
+        note: "Retainer available",
+      },
+    ]),
+  );
+  log("✓ services (4)");
 }
 
 async function seedExperiences() {
@@ -597,6 +647,7 @@ async function seedLinks() {
     await db.insert(schema.navItems).values(
       ordered([
         { label: "About", href: "#about", showInHeader: true, showInFooter: true },
+        { label: "Services", href: "#services", showInHeader: true, showInFooter: true },
         { label: "Skills", href: "#skills", showInHeader: true, showInFooter: true },
         { label: "Experience", href: "#experience", showInHeader: true, showInFooter: true },
         { label: "Projects", href: "#projects", showInHeader: true, showInFooter: true },
@@ -616,7 +667,7 @@ async function reset() {
   // Order matters: children before parents, since foreign keys are enforced.
   await db.delete(schema.skills);
   await db.delete(schema.skillGroups);
-  await db.delete(schema.skillLevels);
+  await db.delete(schema.services);
   await db.delete(schema.highlights);
   await db.delete(schema.highlightGroups);
   await db.delete(schema.projects);
@@ -645,6 +696,7 @@ async function main() {
   await seedSections();
   await seedCoreStack();
   await seedSkills();
+  await seedServices();
   await seedExperiences();
   await seedProjects();
   await seedHighlights();

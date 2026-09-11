@@ -60,10 +60,16 @@ export const ADMIN_NAV: AdminNavGroup[] = [
         description: "Headings, ledes and visibility",
       },
       {
+        href: "/admin/services",
+        label: "What I offer",
+        icon: "Sparkles",
+        description: "Services a client can hire you for",
+      },
+      {
         href: "/admin/skills",
         label: "Skills",
         icon: "Code2",
-        description: "Groups, skills and proficiency tiers",
+        description: "Grouped technologies and tools",
       },
       {
         href: "/admin/experience",
@@ -80,7 +86,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       {
         href: "/admin/highlights",
         label: "Why work with me",
-        icon: "Sparkles",
+        icon: "Heart",
         description: "Strengths and what you're learning",
       },
     ],

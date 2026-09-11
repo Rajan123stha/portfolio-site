@@ -14,9 +14,9 @@ import {
   projects,
   sections,
   sectionKey,
+  services,
   siteSettings,
   skillGroups,
-  skillLevels,
   socialLinks,
   type SectionKey,
 } from "@/db/schema";
@@ -24,6 +24,7 @@ import {
   DEFAULT_CONTACT_LINKS,
   DEFAULT_CORE_STACK,
   DEFAULT_EXPERIENCES,
+  DEFAULT_SERVICES,
   DEFAULT_HIGHLIGHT_GROUPS,
   DEFAULT_NAV_ITEMS,
   DEFAULT_PROFILE,
@@ -32,7 +33,6 @@ import {
   DEFAULT_SECTIONS,
   DEFAULT_SITE_SETTINGS,
   DEFAULT_SKILL_GROUPS,
-  DEFAULT_SKILL_LEVELS,
   DEFAULT_SOCIAL_LINKS,
 } from "@/lib/content/defaults";
 import { CACHE_TAGS } from "./keys";
@@ -162,8 +162,8 @@ const fetchPortfolio = unstable_cache(
       profileRows,
       sectionRows,
       coreStack,
-      levels,
       skillGroupRows,
+      serviceRows,
       experienceRows,
       categories,
       projectRows,
@@ -217,16 +217,6 @@ const fetchPortfolio = unstable_cache(
         .where(eq(coreStackItems.visible, true))
         .orderBy(asc(coreStackItems.sortOrder)),
 
-      db
-        .select({
-          id: skillLevels.id,
-          label: skillLevels.label,
-          percent: skillLevels.percent,
-          color: skillLevels.color,
-        })
-        .from(skillLevels)
-        .orderBy(asc(skillLevels.sortOrder)),
-
       db.query.skillGroups.findMany({
         columns: { id: true, icon: true, label: true, title: true },
         where: eq(skillGroups.visible, true),
@@ -235,14 +225,23 @@ const fetchPortfolio = unstable_cache(
           skills: {
             columns: { id: true, name: true },
             orderBy: (skill, { asc: ascending }) => [ascending(skill.sortOrder)],
-            with: {
-              level: {
-                columns: { id: true, label: true, percent: true, color: true },
-              },
-            },
           },
         },
       }),
+
+      db
+        .select({
+          id: services.id,
+          icon: services.icon,
+          title: services.title,
+          summary: services.summary,
+          deliverables: services.deliverables,
+          note: services.note,
+          featured: services.featured,
+        })
+        .from(services)
+        .where(eq(services.visible, true))
+        .orderBy(asc(services.sortOrder)),
 
       db
         .select({
@@ -340,8 +339,8 @@ const fetchPortfolio = unstable_cache(
       profile: profileRows.at(0) ?? null,
       sections: toSectionMap(sectionRows),
       coreStack,
-      skillLevels: levels,
       skillGroups: skillGroupRows,
+      services: serviceRows,
       experiences: experienceRows,
       projectCategories: categories,
       projects: projectRows,
@@ -388,8 +387,8 @@ function withDefaults(raw: RawPortfolio): PortfolioData {
     ...raw,
     profile: raw.profile ?? DEFAULT_PROFILE,
     coreStack: orEmpty(raw.coreStack, DEFAULT_CORE_STACK),
-    skillLevels: orEmpty(raw.skillLevels, DEFAULT_SKILL_LEVELS),
     skillGroups: orEmpty(raw.skillGroups, DEFAULT_SKILL_GROUPS),
+    services: orEmpty(raw.services, DEFAULT_SERVICES),
     experiences: orEmpty(raw.experiences, DEFAULT_EXPERIENCES),
     // Categories are only filter tabs, so they follow the projects list: real
     // projects with no categories should show a single "All" tab, not starter
@@ -421,8 +420,8 @@ export async function getPortfolio(): Promise<PortfolioData> {
       profile: null,
       sections: toSectionMap([]),
       coreStack: [],
-      skillLevels: [],
       skillGroups: [],
+      services: [],
       experiences: [],
       projectCategories: [],
       projects: [],
@@ -436,8 +435,8 @@ export async function getPortfolio(): Promise<PortfolioData> {
 
 export type ProfileView = NonNullable<RawPortfolio["profile"]>;
 export type CoreStackView = RawPortfolio["coreStack"][number];
-export type SkillLevelView = RawPortfolio["skillLevels"][number];
 export type SkillGroupView = RawPortfolio["skillGroups"][number];
+export type ServiceView = RawPortfolio["services"][number];
 export type ExperienceView = RawPortfolio["experiences"][number];
 export type ProjectCategoryView = RawPortfolio["projectCategories"][number];
 export type ProjectView = RawPortfolio["projects"][number];

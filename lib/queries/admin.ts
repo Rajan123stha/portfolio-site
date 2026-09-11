@@ -16,7 +16,7 @@ import {
   sections,
   siteSettings,
   skillGroups,
-  skillLevels,
+  services,
   socialLinks,
 } from "@/db/schema";
 
@@ -58,8 +58,8 @@ export async function getCoreStackItems() {
     .orderBy(asc(coreStackItems.sortOrder));
 }
 
-export async function getSkillLevels() {
-  return db.select().from(skillLevels).orderBy(asc(skillLevels.sortOrder));
+export async function getServices() {
+  return db.select().from(services).orderBy(asc(services.sortOrder));
 }
 
 export async function getSkillGroupsWithSkills() {
@@ -68,7 +68,6 @@ export async function getSkillGroupsWithSkills() {
     with: {
       skills: {
         orderBy: (skill, { asc: ascending }) => [ascending(skill.sortOrder)],
-        with: { level: true },
       },
     },
   });

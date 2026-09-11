@@ -77,7 +77,7 @@ Public site at `/`, admin at `/admin`.
 
 ```
 db/
-  schema.ts          19 tables — the single source of truth
+  schema.ts          20 tables — the single source of truth
   migrations/        generated SQL, committed
   seed.ts            bootstraps content; safe to re-run
 lib/

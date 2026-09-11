@@ -5,11 +5,11 @@ import type {
   HighlightGroupView,
   NavItemView,
   ProjectCategoryView,
+  ServiceView,
   ProjectView,
   SectionView,
   SiteSettingsView,
   SkillGroupView,
-  SkillLevelView,
   SocialLinkView,
   ProfileView,
 } from "@/lib/queries/public";
@@ -114,6 +114,16 @@ export const DEFAULT_SECTIONS: SectionView[] = [
     visible: true,
   },
   {
+    key: "services",
+    eyebrow: "What I Offer",
+    heading: "What you get when",
+    headingAccent: "we work together",
+    subheading:
+      "From a single landing page to a full internal system — here is what I take on, and what is included.",
+    note: null,
+    visible: true,
+  },
+  {
     key: "skills",
     eyebrow: "Expertise",
     heading: "My Skills",
@@ -179,31 +189,6 @@ export const DEFAULT_CORE_STACK: CoreStackView[] = [
 
 // ── Skills ───────────────────────────────────────────────────────────────────
 
-const EXPERT: SkillLevelView = {
-  id: id("level-expert"),
-  label: "Expert",
-  percent: 100,
-  color: "primary",
-};
-const ADVANCED: SkillLevelView = {
-  id: id("level-advanced"),
-  label: "Advanced",
-  percent: 80,
-  color: "primaryStrong",
-};
-const INTERMEDIATE: SkillLevelView = {
-  id: id("level-intermediate"),
-  label: "Intermediate",
-  percent: 62,
-  color: "primarySoft",
-};
-
-export const DEFAULT_SKILL_LEVELS: SkillLevelView[] = [
-  EXPERT,
-  ADVANCED,
-  INTERMEDIATE,
-];
-
 export const DEFAULT_SKILL_GROUPS: SkillGroupView[] = [
   {
     id: id("group-dev"),
@@ -211,14 +196,14 @@ export const DEFAULT_SKILL_GROUPS: SkillGroupView[] = [
     label: "Programming",
     title: "Dev Stack",
     skills: [
-      { id: id("skill-react"), name: "React", level: EXPERT },
-      { id: id("skill-ts"), name: "TypeScript", level: INTERMEDIATE },
-      { id: id("skill-tailwind"), name: "Tailwind CSS", level: ADVANCED },
-      { id: id("skill-next"), name: "Next.js", level: ADVANCED },
-      { id: id("skill-node"), name: "Node.js", level: INTERMEDIATE },
-      { id: id("skill-express"), name: "Express.js", level: ADVANCED },
-      { id: id("skill-redux"), name: "Redux", level: INTERMEDIATE },
-      { id: id("skill-mongo"), name: "MongoDB", level: INTERMEDIATE },
+      { id: id("skill-react"), name: "React" },
+      { id: id("skill-ts"), name: "TypeScript" },
+      { id: id("skill-tailwind"), name: "Tailwind CSS" },
+      { id: id("skill-next"), name: "Next.js" },
+      { id: id("skill-node"), name: "Node.js" },
+      { id: id("skill-express"), name: "Express.js" },
+      { id: id("skill-redux"), name: "Redux" },
+      { id: id("skill-mongo"), name: "MongoDB" },
     ],
   },
   {
@@ -227,18 +212,75 @@ export const DEFAULT_SKILL_GROUPS: SkillGroupView[] = [
     label: "Tools & Platforms",
     title: "Tools & Platforms",
     skills: [
-      { id: id("skill-uiux"), name: "UI/UX Design", level: INTERMEDIATE },
-      { id: id("skill-figma"), name: "Figma", level: INTERMEDIATE },
-      { id: id("skill-wordpress"), name: "WordPress", level: ADVANCED },
-      {
-        id: id("skill-wagtail"),
-        name: "Wagtail / Payload CMS",
-        level: INTERMEDIATE,
-      },
-      { id: id("skill-aws"), name: "AWS", level: INTERMEDIATE },
-      { id: id("skill-git"), name: "Git / GitHub", level: ADVANCED },
-      { id: id("skill-testing"), name: "Jest & Cypress", level: INTERMEDIATE },
+      { id: id("skill-uiux"), name: "UI/UX Design" },
+      { id: id("skill-figma"), name: "Figma" },
+      { id: id("skill-wordpress"), name: "WordPress" },
+      { id: id("skill-wagtail"), name: "Wagtail / Payload CMS" },
+      { id: id("skill-aws"), name: "AWS" },
+      { id: id("skill-git"), name: "Git / GitHub" },
+      { id: id("skill-testing"), name: "Jest & Cypress" },
     ],
+  },
+];
+
+// ── Services ─────────────────────────────────────────────────────────────────
+
+export const DEFAULT_SERVICES: ServiceView[] = [
+  {
+    id: id("service-web"),
+    icon: "Monitor",
+    title: "Website development",
+    summary:
+      "Marketing sites, landing pages and company websites built to load fast, rank well, and stay easy to update.",
+    deliverables: [
+      "Responsive design from mobile to desktop",
+      "CMS so you can edit content yourself",
+      "SEO, analytics and performance tuning",
+    ],
+    note: "From 2 weeks",
+    featured: true,
+  },
+  {
+    id: id("service-app"),
+    icon: "Smartphone",
+    title: "Web & mobile apps",
+    summary:
+      "Product-style applications with authentication, dashboards and real data behind them — not just screens.",
+    deliverables: [
+      "React / Next.js frontend",
+      "REST or server-action APIs",
+      "Role-based auth and secure workflows",
+    ],
+    note: "From 4 weeks",
+    featured: false,
+  },
+  {
+    id: id("service-system"),
+    icon: "Boxes",
+    title: "Internal systems",
+    summary:
+      "Admin panels and business tools that replace the spreadsheet — booking flows, inventory, enquiry pipelines.",
+    deliverables: [
+      "Custom admin dashboard",
+      "PostgreSQL data modelling",
+      "Reporting and exports",
+    ],
+    note: null,
+    featured: false,
+  },
+  {
+    id: id("service-cloud"),
+    icon: "Cloud",
+    title: "Deployment & maintenance",
+    summary:
+      "Getting it live on AWS or Vercel with SSL, CI and monitoring — then keeping it healthy.",
+    deliverables: [
+      "AWS S3 / CloudFront or Vercel setup",
+      "Custom domain and SSL",
+      "Ongoing fixes and improvements",
+    ],
+    note: "Retainer available",
+    featured: false,
   },
 ];
 
@@ -479,6 +521,13 @@ export const DEFAULT_NAV_ITEMS: NavItemView[] = [
     id: id("nav-about"),
     label: "About",
     href: "#about",
+    showInHeader: true,
+    showInFooter: true,
+  },
+  {
+    id: id("nav-services"),
+    label: "Services",
+    href: "#services",
     showInHeader: true,
     showInFooter: true,
   },

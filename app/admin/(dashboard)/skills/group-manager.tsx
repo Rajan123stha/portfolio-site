@@ -24,21 +24,13 @@ import {
   updateSkill,
   updateSkillGroup,
 } from "@/lib/actions/content";
-import type { Skill, SkillGroup, SkillLevel } from "@/db/schema";
-import { resolveColor, resolveIcon } from "@/lib/design-tokens";
+import type { Skill, SkillGroup } from "@/db/schema";
+import { resolveIcon } from "@/lib/design-tokens";
 import { skillGroupSchema, skillSchema } from "@/lib/validators/content";
 
-type GroupWithSkills = SkillGroup & {
-  skills: (Skill & { level: SkillLevel })[];
-};
+type GroupWithSkills = SkillGroup & { skills: Skill[] };
 
-export function GroupManager({
-  groups,
-  levels,
-}: {
-  groups: GroupWithSkills[];
-  levels: SkillLevel[];
-}) {
+export function GroupManager({ groups }: { groups: GroupWithSkills[] }) {
   return (
     <Panel
       title="Skill groups"
@@ -64,7 +56,7 @@ export function GroupManager({
         deleteDescription={(group) =>
           `“${group.title}” and its ${group.skills.length} skill${group.skills.length === 1 ? "" : "s"} will be deleted.`
         }
-        summary={(group) => <GroupSummary group={group} levels={levels} />}
+        summary={(group) => <GroupSummary group={group} />}
         fields={({ register, control, formState: { errors } }) => (
           <div className="grid gap-4 sm:grid-cols-[8rem_1fr_1fr]">
             <Field label="Icon" error={errors.icon?.message}>
@@ -115,13 +107,7 @@ export function GroupManager({
  * The collapsed row for a group doubles as the entry point to its skills, so
  * the whole card is manageable without leaving the page.
  */
-function GroupSummary({
-  group,
-  levels,
-}: {
-  group: GroupWithSkills;
-  levels: SkillLevel[];
-}) {
+function GroupSummary({ group }: { group: GroupWithSkills }) {
   const Icon = resolveIcon(group.icon);
 
   return (
@@ -142,32 +128,16 @@ function GroupSummary({
       </div>
 
       <div className="rounded-lg border border-border bg-muted/30 p-3">
-        <SkillList group={group} levels={levels} />
+        <SkillList group={group} />
       </div>
     </div>
   );
 }
 
-function SkillList({
-  group,
-  levels,
-}: {
-  group: GroupWithSkills;
-  levels: SkillLevel[];
-}) {
+function SkillList({ group }: { group: GroupWithSkills }) {
   const router = useRouter();
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-
-  const defaultLevelId = levels[0]?.id ?? "";
-
-  if (levels.length === 0) {
-    return (
-      <p className="text-xs text-muted-foreground">
-        Add a proficiency tier above before adding skills.
-      </p>
-    );
-  }
 
   return (
     <div className="space-y-2">
@@ -181,12 +151,7 @@ function SkillList({
           {(skill) =>
             editingId === skill.id ? (
               <SkillForm
-                levels={levels}
-                defaultValues={{
-                  groupId: group.id,
-                  levelId: skill.levelId,
-                  name: skill.name,
-                }}
+                defaultValues={{ groupId: group.id, name: skill.name }}
                 submitLabel="Save"
                 action={(values) => updateSkill(skill.id, values)}
                 onDone={() => {
@@ -204,13 +169,10 @@ function SkillList({
                 >
                   <span
                     aria-hidden
-                    className={`h-2 w-2 shrink-0 rounded-full ${resolveColor(skill.level.color)}`}
+                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60"
                   />
                   <span className="truncate text-sm text-foreground">
                     {skill.name}
-                  </span>
-                  <span className="ml-auto shrink-0 text-xs text-muted-foreground">
-                    {skill.level.label}
                   </span>
                 </button>
 
@@ -233,12 +195,7 @@ function SkillList({
 
       {adding ? (
         <SkillForm
-          levels={levels}
-          defaultValues={{
-            groupId: group.id,
-            levelId: defaultLevelId,
-            name: "",
-          }}
+          defaultValues={{ groupId: group.id, name: "" }}
           submitLabel="Add skill"
           action={createSkill}
           onDone={() => {
@@ -264,19 +221,16 @@ function SkillList({
 }
 
 function SkillForm({
-  levels,
   defaultValues,
   submitLabel,
   action,
   onDone,
   onCancel,
 }: {
-  levels: SkillLevel[];
-  defaultValues: { groupId: string; levelId: string; name: string };
+  defaultValues: { groupId: string; name: string };
   submitLabel: string;
   action: (values: {
     groupId: string;
-    levelId: string;
     name: string;
   }) => Promise<import("@/lib/actions/result").ActionResult<unknown>>;
   onDone: () => void;
@@ -298,27 +252,13 @@ function SkillForm({
     <form onSubmit={onSubmit} className="space-y-2" noValidate>
       <input type="hidden" {...register("groupId")} />
 
-      <div className="flex flex-wrap gap-2">
-        <input
-          {...register("name")}
-          aria-label="Skill name"
-          aria-invalid={Boolean(errors.name)}
-          placeholder="React"
-          className={`${inputClass} min-w-[8rem] flex-1`}
-        />
-
-        <select
-          {...register("levelId")}
-          aria-label="Proficiency"
-          className={`${inputClass} w-auto`}
-        >
-          {levels.map((level) => (
-            <option key={level.id} value={level.id}>
-              {level.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <input
+        {...register("name")}
+        aria-label="Skill name"
+        aria-invalid={Boolean(errors.name)}
+        placeholder="React"
+        className={inputClass}
+      />
 
       {errors.name?.message ? (
         <p role="alert" className="text-xs font-medium text-destructive">

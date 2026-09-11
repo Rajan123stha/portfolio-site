@@ -8,7 +8,7 @@ import {
   highlights,
   navItems,
   skillGroups,
-  skillLevels,
+  services,
   skills,
   socialLinks,
 } from "@/db/schema";
@@ -20,7 +20,7 @@ import {
   highlightSchema,
   navItemSchema,
   skillGroupSchema,
-  skillLevelSchema,
+  serviceSchema,
   skillSchema,
   socialLinkSchema,
 } from "@/lib/validators/content";
@@ -59,32 +59,6 @@ export async function reorderCoreStackItems(input: unknown) {
 }
 
 // ── Skills ───────────────────────────────────────────────────────────────────
-
-const levels = createCrudActions({
-  table: skillLevels,
-  schema: skillLevelSchema,
-  noun: "level",
-  uniqueField: "label",
-  uniqueMessage: "A level with that name already exists.",
-});
-
-export async function createSkillLevel(input: unknown) {
-  return levels.create(input);
-}
-export async function updateSkillLevel(id: string, input: unknown) {
-  return levels.update(id, input);
-}
-/**
- * Blocked by `ON DELETE RESTRICT` while any skill still references the level,
- * which is the desired outcome — removing a tier shouldn't silently strip the
- * proficiency from every skill using it.
- */
-export async function deleteSkillLevel(id: string): Promise<ActionResult> {
-  return levels.remove(id);
-}
-export async function reorderSkillLevels(input: unknown) {
-  return levels.reorder(input);
-}
 
 const groups = createCrudActions({
   table: skillGroups,
@@ -125,6 +99,30 @@ export async function deleteSkill(id: string): Promise<ActionResult> {
 }
 export async function reorderSkills(input: unknown) {
   return skill.reorder(input);
+}
+
+// ── Services ─────────────────────────────────────────────────────────────────
+
+const service = createCrudActions({
+  table: services,
+  schema: serviceSchema,
+  noun: "service",
+});
+
+export async function createService(input: unknown) {
+  return service.create(input);
+}
+export async function updateService(id: string, input: unknown) {
+  return service.update(id, input);
+}
+export async function deleteService(id: string): Promise<ActionResult> {
+  return service.remove(id);
+}
+export async function reorderServices(input: unknown) {
+  return service.reorder(input);
+}
+export async function setServiceVisible(id: string, visible: boolean) {
+  return service.setVisible(id, visible);
 }
 
 // ── Experience ───────────────────────────────────────────────────────────────

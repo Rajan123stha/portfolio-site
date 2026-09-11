@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import {
   DndContext,
   KeyboardSensor,
@@ -50,20 +50,35 @@ export function SortableList<TItem extends Identifiable>({
   children,
   className,
 }: SortableListProps<TItem>) {
-  const [order, setOrder] = useState(items);
+  /**
+   * Only the *order* a drag is proposing is held locally — never the rows
+   * themselves.
+   *
+   * This list used to mirror `items` into state and re-sync only when the id
+   * order changed. Renaming a row leaves the ids identical, so that guard read
+   * as "nothing moved" and discarded the freshly-fetched row: the server had
+   * the new title, the screen kept the old one, and only a full reload fixed
+   * it.
+   *
+   * Deriving the rows from props on every render means server data always
+   * wins, while `pendingIds` still lets a drag settle instantly instead of
+   * waiting for the round-trip.
+   */
+  const [pendingIds, setPendingIds] = useState<string[] | null>(null);
   const [, startTransition] = useTransition();
 
-  // Re-sync when the server sends a new list (a create, delete, or a rejected
-  // reorder). Comparing ids avoids clobbering an in-flight drag on unrelated
-  // re-renders.
-  useEffect(() => {
-    setOrder((current) => {
-      const sameOrder =
-        current.length === items.length &&
-        current.every((item, index) => item.id === items[index].id);
-      return sameOrder ? current : items;
-    });
-  }, [items]);
+  const order = useMemo(() => {
+    if (!pendingIds) return items;
+
+    const byId = new Map(items.map((item) => [item.id, item]));
+    const reordered = pendingIds
+      .map((id) => byId.get(id))
+      .filter((item): item is TItem => item !== undefined);
+
+    // A row was added or removed since the drag, so the pending order no
+    // longer describes this list — the server's ordering is the truthful one.
+    return reordered.length === items.length ? reordered : items;
+  }, [items, pendingIds]);
 
   const sensors = useSensors(
     // A small distance threshold keeps a click on a row's buttons from being
@@ -81,14 +96,15 @@ export function SortableList<TItem extends Identifiable>({
     const to = order.findIndex((item) => item.id === over.id);
     if (from === -1 || to === -1) return;
 
-    const previous = order;
-    const next = arrayMove(order, from, to);
-    setOrder(next);
+    const nextIds = arrayMove(order, from, to).map((item) => item.id);
+    setPendingIds(nextIds);
 
     startTransition(async () => {
-      const result = await onReorder({ ids: next.map((item) => item.id) });
+      const result = await onReorder({ ids: nextIds });
       if (!result.ok) {
-        setOrder(previous);
+        // Dropping the pending order snaps the list back to whatever the
+        // server last sent, which is still the truth.
+        setPendingIds(null);
         toast.error(result.error);
       }
     });

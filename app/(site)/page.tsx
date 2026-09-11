@@ -6,6 +6,7 @@ import { Contact } from "@/components/sections/contact";
 import { Experience } from "@/components/sections/experience";
 import { Hero } from "@/components/sections/hero";
 import { Projects } from "@/components/sections/projects";
+import { Services } from "@/components/sections/services";
 import { Skills } from "@/components/sections/skills";
 import { Value } from "@/components/sections/value";
 import { getPortfolio, getSiteSettings } from "@/lib/queries/public";
@@ -49,6 +50,7 @@ export default async function PortfolioPage() {
 
   const show = {
     about: sections.about.visible,
+    services: sections.services.visible && data.services.length > 0,
     skills: sections.skills.visible && data.skillGroups.length > 0,
     experience: sections.experience.visible && data.experiences.length > 0,
     projects: sections.projects.visible && data.projects.length > 0,
@@ -87,10 +89,17 @@ export default async function PortfolioPage() {
           />
         ) : null}
 
+        {show.services ? (
+          <Services
+            section={sections.services}
+            services={data.services}
+            index={nextIndex()}
+          />
+        ) : null}
+
         {show.skills ? (
           <Skills
             section={sections.skills}
-            levels={data.skillLevels}
             groups={data.skillGroups}
             index={nextIndex()}
           />

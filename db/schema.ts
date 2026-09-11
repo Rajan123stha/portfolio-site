@@ -152,6 +152,7 @@ export const profile = pgTable("profile", {
 export const sectionKey = pgEnum("section_key", [
   "hero",
   "about",
+  "services",
   "skills",
   "experience",
   "projects",
@@ -188,23 +189,6 @@ export const coreStackItems = pgTable("core_stack_items", {
 
 // ── Skills ───────────────────────────────────────────────────────────────────
 
-/**
- * Proficiency tiers are data rather than an enum so the legend, ordering and
- * bar widths stay editable without a migration.
- */
-export const skillLevels = pgTable("skill_levels", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  label: text("label").notNull(),
-  /** Bar fill, 0–100. */
-  percent: integer("percent").notNull(),
-  color: text("color").$type<ColorToken>().notNull(),
-  sortOrder: integer("sort_order").notNull().default(0),
-  ...timestamps,
-}, (table) => [
-  uniqueIndex("skill_levels_label_key").on(table.label),
-  check("skill_levels_percent_range", sql`${table.percent} between 0 and 100`),
-]);
-
 export const skillGroups = pgTable("skill_groups", {
   id: uuid("id").primaryKey().defaultRandom(),
   icon: text("icon").$type<IconName>().notNull(),
@@ -221,14 +205,39 @@ export const skills = pgTable("skills", {
   groupId: uuid("group_id")
     .notNull()
     .references(() => skillGroups.id, { onDelete: "cascade" }),
-  levelId: uuid("level_id")
-    .notNull()
-    .references(() => skillLevels.id, { onDelete: "restrict" }),
   name: text("name").notNull(),
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps,
 }, (table) => [
   index("skills_group_idx").on(table.groupId, table.sortOrder),
+]);
+
+// ── Services ("what I offer") ────────────────────────────────────────────────
+
+/**
+ * Offerings pitched to a prospective client — website build, mobile app,
+ * internal system, and so on.
+ *
+ * Separate from `skills` on purpose. Skills answer "what does this person
+ * know"; services answer "what can I buy from them", which is the question a
+ * hiring manager or client actually arrives with. They read differently and
+ * belong in different sections.
+ */
+export const services = pgTable("services", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  icon: text("icon").$type<IconName>().notNull(),
+  title: text("title").notNull(),
+  summary: text("summary").notNull().default(""),
+  /** Concrete deliverables. Ordered strings with no identity of their own. */
+  deliverables: jsonb("deliverables").$type<string[]>().notNull().default([]),
+  /** Optional lead-time or starting-price note, e.g. "From 2 weeks". */
+  note: text("note"),
+  featured: boolean("featured").notNull().default(false),
+  sortOrder: integer("sort_order").notNull().default(0),
+  visible: boolean("visible").notNull().default(true),
+  ...timestamps,
+}, (table) => [
+  index("services_order_idx").on(table.sortOrder),
 ]);
 
 // ── Experience ───────────────────────────────────────────────────────────────
@@ -456,14 +465,6 @@ export const skillsRelations = relations(skills, ({ one }) => ({
     fields: [skills.groupId],
     references: [skillGroups.id],
   }),
-  level: one(skillLevels, {
-    fields: [skills.levelId],
-    references: [skillLevels.id],
-  }),
-}));
-
-export const skillLevelsRelations = relations(skillLevels, ({ many }) => ({
-  skills: many(skills),
 }));
 
 export const projectsRelations = relations(projects, ({ one }) => ({
@@ -498,9 +499,9 @@ export type Profile = typeof profile.$inferSelect;
 export type Section = typeof sections.$inferSelect;
 export type SectionKey = (typeof sectionKey.enumValues)[number];
 export type CoreStackItem = typeof coreStackItems.$inferSelect;
-export type SkillLevel = typeof skillLevels.$inferSelect;
 export type SkillGroup = typeof skillGroups.$inferSelect;
 export type Skill = typeof skills.$inferSelect;
+export type Service = typeof services.$inferSelect;
 export type Experience = typeof experiences.$inferSelect;
 export type ProjectCategory = typeof projectCategories.$inferSelect;
 export type Project = typeof projects.$inferSelect;
