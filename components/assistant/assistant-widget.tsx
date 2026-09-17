@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowUp,
@@ -13,8 +20,15 @@ import {
   X,
 } from "lucide-react";
 
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { MAX_QUESTION_LENGTH, type AssistantSource } from "@/lib/assistant/protocol";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  MAX_QUESTION_LENGTH,
+  type AssistantSource,
+} from "@/lib/assistant/protocol";
 import { AssistantAnswer, normaliseLink } from "./assistant-answer";
 import { useAssistantChat, type UserMessage } from "./use-assistant-chat";
 import { useTurnstile } from "./use-turnstile";
@@ -126,7 +140,8 @@ export function AssistantWidget({
   // Follow the answer as it streams, unless the reader has scrolled up.
   useEffect(() => {
     const element = scrollRef.current;
-    if (element && pinnedToBottom.current) element.scrollTop = element.scrollHeight;
+    if (element && pinnedToBottom.current)
+      element.scrollTop = element.scrollHeight;
   }, [messages, open]);
 
   const onScroll = () => {
@@ -143,7 +158,8 @@ export function AssistantWidget({
   );
   // Counted locally so a full chat stops *before* sending a request the server
   // would refuse.
-  const questionsLeft = turnLimit - messages.filter((message) => message.role === "user").length;
+  const questionsLeft =
+    turnLimit - messages.filter((message) => message.role === "user").length;
 
   const submit = (question: string) => {
     if (busy || !question.trim() || questionsLeft <= 0) return;
@@ -160,20 +176,29 @@ export function AssistantWidget({
 
   const onComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     // Enter sends, Shift+Enter breaks the line; never mid IME composition.
-    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey &&
+      !event.nativeEvent.isComposing
+    ) {
       event.preventDefault();
       submit(draft);
     }
   };
 
-  const navigate = (destination: Pick<AssistantSource, "href" | "fallbackHref">) => {
+  const navigate = (
+    destination: Pick<AssistantSource, "href" | "fallbackHref">,
+  ) => {
     const target =
       document.getElementById(destination.href.slice(1)) ??
       document.getElementById(destination.fallbackHref.slice(1));
     if (!target) return;
 
     if (compact) setOpen(false);
-    target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    target.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
 
     if (!reduceMotion) {
       target.animate(
@@ -188,7 +213,10 @@ export function AssistantWidget({
 
   const last = messages.at(-1);
   const followUps =
-    !busy && questionsLeft > 0 && last?.role === "assistant" && last.status === "done"
+    !busy &&
+    questionsLeft > 0 &&
+    last?.role === "assistant" &&
+    last.status === "done"
       ? questions.filter((question) => !asked.has(question)).slice(0, 3)
       : [];
 
@@ -229,14 +257,19 @@ export function AssistantWidget({
           >
             <span className="relative grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-primary to-accent-2 text-primary-foreground">
               {!discovered ? (
-                <span aria-hidden className="absolute inset-0 animate-ping rounded-full bg-primary/40" />
+                <span
+                  aria-hidden
+                  className="absolute inset-0 animate-ping rounded-full bg-primary/40"
+                />
               ) : null}
               <Sparkles aria-hidden className="relative h-[18px] w-[18px]" />
             </span>
             <span className="hidden flex-col items-start leading-tight sm:flex">
-              <span className="text-sm font-semibold text-foreground">Ask about {firstName}</span>
+              <span className="text-sm font-semibold text-foreground">
+                Ask about {firstName}
+              </span>
               <span className="label-mono text-[0.58rem] text-muted-foreground">
-                AI · cites its sources
+                AI
               </span>
             </span>
           </motion.button>
@@ -258,9 +291,17 @@ export function AssistantWidget({
               if (!event.currentTarget.contains(event.target as Node)) return;
               setOpen(false);
             }}
-            initial={{ opacity: 0, y: compact ? 24 : 16, scale: compact ? 1 : 0.98 }}
+            initial={{
+              opacity: 0,
+              y: compact ? 24 : 16,
+              scale: compact ? 1 : 0.98,
+            }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: compact ? 24 : 12, scale: compact ? 1 : 0.98 }}
+            exit={{
+              opacity: 0,
+              y: compact ? 24 : 12,
+              scale: compact ? 1 : 0.98,
+            }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             style={{ transformOrigin: "bottom right" }}
             className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-background sm:inset-auto sm:bottom-6 sm:right-6 sm:h-[min(660px,calc(100dvh-3rem))] sm:w-[400px] sm:rounded-2xl sm:border sm:border-border sm:bg-card sm:shadow-[0_32px_80px_-24px_rgba(0,0,0,0.45)]"
@@ -273,10 +314,17 @@ export function AssistantWidget({
 
             {/* ── Header ── */}
             <header className="flex shrink-0 items-center gap-3 bg-gradient-to-b from-primary/[0.07] to-transparent px-4 pb-3 pt-3.5">
-              <Avatar firstName={firstName} avatarUrl={avatarUrl} online={Boolean(availability)} />
+              <Avatar
+                firstName={firstName}
+                avatarUrl={avatarUrl}
+                online={Boolean(availability)}
+              />
 
               <div className="min-w-0 flex-1">
-                <h2 id="assistant-title" className="truncate text-sm font-semibold text-foreground">
+                <h2
+                  id="assistant-title"
+                  className="truncate text-sm font-semibold text-foreground"
+                >
                   Ask about {firstName}
                 </h2>
                 <p className="truncate text-xs text-muted-foreground">
@@ -289,15 +337,23 @@ export function AssistantWidget({
                   <RotateCcw className="h-4 w-4" />
                 </IconButton>
               ) : null}
-              <IconButton label="Close the assistant" onClick={() => setOpen(false)}>
+              <IconButton
+                label="Close the assistant"
+                onClick={() => setOpen(false)}
+              >
                 <X className="h-4 w-4" />
               </IconButton>
             </header>
 
             {/* ── Trust strip ── */}
             <div className="flex shrink-0 items-center gap-2 border-y border-border bg-muted/30 px-4 py-1.5 text-[11px] text-muted-foreground">
-              <ShieldCheck aria-hidden className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-              <span className="min-w-0 flex-1 truncate">Answers cite this page · unverifiable details are flagged</span>
+              <ShieldCheck
+                aria-hidden
+                className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
+              />
+              <span className="min-w-0 flex-1 truncate">
+                Answers cite this page · unverifiable details are flagged
+              </span>
               <Popover>
                 <PopoverTrigger asChild>
                   <button
@@ -313,18 +369,30 @@ export function AssistantWidget({
                   align="end"
                   className="w-72 rounded-xl p-4 text-xs leading-relaxed"
                 >
-                  <p className="font-semibold text-foreground">How answers are checked</p>
+                  <p className="font-semibold text-foreground">
+                    How answers are checked
+                  </p>
                   <ul className="mt-2 space-y-2 text-muted-foreground">
                     <li>
-                      The assistant only knows the {factCount} facts published on this page — nothing
-                      from the wider internet.
+                      The assistant only knows the {factCount} facts published
+                      on this page — nothing from the wider internet.
                     </li>
-                    <li>Every claim carries a numbered source you can open and read.</li>
                     <li>
-                      Numbers, names and links are compared with the portfolio automatically. Anything
-                      that doesn’t match is marked <span className="font-medium text-amber-600 dark:text-amber-400">Unverified</span>.
+                      Every claim carries a numbered source you can open and
+                      read.
                     </li>
-                    <li>If the portfolio doesn’t cover a question, it says so rather than guessing.</li>
+                    <li>
+                      Numbers, names and links are compared with the portfolio
+                      automatically. Anything that doesn’t match is marked{" "}
+                      <span className="font-medium text-amber-600 dark:text-amber-400">
+                        Unverified
+                      </span>
+                      .
+                    </li>
+                    <li>
+                      If the portfolio doesn’t cover a question, it says so
+                      rather than guessing.
+                    </li>
                   </ul>
                 </PopoverContent>
               </Popover>
@@ -344,10 +412,15 @@ export function AssistantWidget({
 
                   {questions.length > 0 ? (
                     <div>
-                      <p className="label-mono text-[0.6rem] text-muted-foreground">Recruiters often ask</p>
+                      <p className="label-mono text-[0.6rem] text-muted-foreground">
+                        Recruiters often ask
+                      </p>
                       <div className="mt-2.5 flex flex-wrap gap-2">
                         {questions.map((question) => (
-                          <SuggestionChip key={question} onClick={() => submit(question)}>
+                          <SuggestionChip
+                            key={question}
+                            onClick={() => submit(question)}
+                          >
                             {question}
                           </SuggestionChip>
                         ))}
@@ -380,10 +453,15 @@ export function AssistantWidget({
 
               {followUps.length > 0 ? (
                 <div className="pt-1">
-                  <p className="label-mono text-[0.6rem] text-muted-foreground">You could also ask</p>
+                  <p className="label-mono text-[0.6rem] text-muted-foreground">
+                    You could also ask
+                  </p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {followUps.map((question) => (
-                      <SuggestionChip key={question} onClick={() => submit(question)}>
+                      <SuggestionChip
+                        key={question}
+                        onClick={() => submit(question)}
+                      >
                         {question}
                       </SuggestionChip>
                     ))}
@@ -394,7 +472,11 @@ export function AssistantWidget({
 
             {/* Screen readers get one announcement per answer, not every token. */}
             <p className="sr-only" aria-live="polite">
-              {busy ? "Answering…" : last?.role === "assistant" && last.status === "done" ? "Answer ready." : ""}
+              {busy
+                ? "Answering…"
+                : last?.role === "assistant" && last.status === "done"
+                  ? "Answer ready."
+                  : ""}
             </p>
 
             {/* ── Composer ── */}
@@ -458,10 +540,14 @@ export function AssistantWidget({
                   </button>
                 ) : questionsLeft <= 2 ? (
                   <span className="truncate">
-                    {questionsLeft} {questionsLeft === 1 ? "question" : "questions"} left in this chat
+                    {questionsLeft}{" "}
+                    {questionsLeft === 1 ? "question" : "questions"} left in
+                    this chat
                   </span>
                 ) : (
-                  <span className="truncate">Answers come only from this portfolio.</span>
+                  <span className="truncate">
+                    Answers come only from this portfolio.
+                  </span>
                 )}
                 {nearLimit ? (
                   <span className="shrink-0 font-mono">
@@ -536,7 +622,13 @@ function IconButton({
   );
 }
 
-function SuggestionChip({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+function SuggestionChip({
+  onClick,
+  children,
+}: {
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
