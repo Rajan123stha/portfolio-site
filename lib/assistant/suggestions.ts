@@ -33,5 +33,5 @@ export function resolveQuestions(custom: string[], firstName: string): string[] 
 }
 
 export function defaultWelcome(firstName: string): string {
-  return `Hi! I can answer questions about ${firstName}'s experience, projects and skills — and I'll show you where on this page each answer comes from.`;
+  return `Hi! I can answer questions about ${firstName}'s experience, projects and skills.`;
 }
