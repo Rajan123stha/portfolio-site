@@ -43,6 +43,13 @@
       "when": 1789116012738,
       "tag": "0005_assistant_answer_cache",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790070334041,
+      "tag": "0006_seo_content",
+      "breakpoints": true
     }
   ]
 }

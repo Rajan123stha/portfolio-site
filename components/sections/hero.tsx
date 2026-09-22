@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowDown, ArrowUpRight, Download, MapPin } from "lucide-react";
 
@@ -17,25 +16,25 @@ type HeroProps = {
   tech: string[];
 };
 
-/** Stagger container — children declare their own `hidden`/`show` variants. */
-const container = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
-};
-
-const rise = {
-  hidden: { opacity: 0, y: 24 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const },
-  },
-};
+/**
+ * Staggered entrance, done in CSS rather than Framer Motion.
+ *
+ * With Framer, every hero element was server-rendered at `opacity: 0` and only
+ * faded in once the page's JavaScript had loaded and hydrated. The heading and
+ * bio are the page's largest content, so the browser couldn't count them as
+ * painted until then — on a mid-range phone that pushed Largest Contentful
+ * Paint to about 5s. A CSS animation starts with the first paint, JavaScript or
+ * not, so the same entrance now finishes within a second.
+ */
+function rise(step: number) {
+  return { animationDelay: `${100 + step * 80}ms` };
+}
 
 export function Hero({ profile, tech }: HeroProps) {
   const {
     greeting,
     fullName,
+    headline,
     typewriterWords,
     availabilityLabel,
     availabilityVisible,
@@ -65,16 +64,11 @@ export function Hero({ profile, tech }: HeroProps) {
       </div>
 
       <div className="container relative z-10 max-w-6xl">
-        <motion.div
-          className="grid grid-cols-1 items-center gap-14 lg:grid-cols-[1.15fr_0.85fr] lg:gap-20"
-          variants={container}
-          initial="hidden"
-          animate="show"
-        >
+        <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-[1.15fr_0.85fr] lg:gap-20">
           {/* ── LEFT: type ── */}
           <div className="flex flex-col gap-7">
             {availabilityVisible && availabilityLabel ? (
-              <motion.div variants={rise}>
+              <div className="animate-rise" style={rise(0)}>
                 <span className="inline-flex w-fit items-center gap-2.5 rounded-full border border-border bg-card px-3.5 py-1.5">
                   <span className="relative flex h-1.5 w-1.5">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none" />
@@ -84,41 +78,52 @@ export function Hero({ profile, tech }: HeroProps) {
                     {availabilityLabel}
                   </span>
                 </span>
-              </motion.div>
+              </div>
             ) : null}
 
-            <motion.h1
-              variants={rise}
-              className="text-display font-semibold text-balance"
-            >
+            {/*
+              The greeting sits outside the <h1>: the main heading is the
+              strongest on-page signal of what the page is about, so it holds
+              the name and the role — not "Hi 👋, I'm".
+            */}
+            <div className="animate-rise" style={rise(1)}>
               {greeting ? (
-                <span className="block text-[0.42em] font-normal leading-tight tracking-normal text-muted-foreground">
-                  {greeting}
-                </span>
+                <p className="text-display">
+                  <span className="block text-[0.42em] font-normal leading-tight tracking-normal text-muted-foreground">
+                    {greeting}
+                  </span>
+                </p>
               ) : null}
-              <span className="text-gradient">{fullName}</span>
-            </motion.h1>
+              <h1 className="text-display font-semibold text-balance">
+                <span className="text-gradient">{fullName}</span>
+                {headline ? (
+                  <span className="mt-3 block text-[max(0.32em,1.15rem)] font-medium leading-snug tracking-tight text-foreground/80">
+                    {headline}
+                  </span>
+                ) : null}
+              </h1>
+            </div>
 
             {typewriterWords.length > 0 ? (
-              <motion.div variants={rise} className="-mt-2">
+              <div className="-mt-2 animate-rise" style={rise(2)}>
                 <TypewriterEffect
                   words={typewriterWords}
                   className="font-mono text-lg text-muted-foreground md:text-xl"
                 />
-              </motion.div>
+              </div>
             ) : null}
 
             {heroBio ? (
-              <motion.p
-                variants={rise}
-                className="max-w-xl text-base leading-relaxed text-muted-foreground text-pretty md:text-lg"
+              <p
+                className="max-w-xl animate-rise text-base leading-relaxed text-muted-foreground text-pretty md:text-lg"
+                style={rise(3)}
               >
                 {heroBio}
-              </motion.p>
+              </p>
             ) : null}
 
             {openTo.length > 0 ? (
-              <motion.ul variants={rise} className="flex flex-wrap gap-2">
+              <ul className="flex animate-rise flex-wrap gap-2" style={rise(4)}>
                 {openTo.map((tag) => (
                   <li
                     key={tag}
@@ -128,12 +133,12 @@ export function Hero({ profile, tech }: HeroProps) {
                     {tag}
                   </li>
                 ))}
-              </motion.ul>
+              </ul>
             ) : null}
 
-            <motion.div
-              variants={rise}
-              className="flex flex-col gap-3 pt-1 sm:flex-row"
+            <div
+              className="flex animate-rise flex-col gap-3 pt-1 sm:flex-row"
+              style={rise(5)}
             >
               <Button
                 asChild
@@ -165,12 +170,12 @@ export function Hero({ profile, tech }: HeroProps) {
                   </a>
                 </Button>
               ) : null}
-            </motion.div>
+            </div>
 
             {location || experienceYears ? (
-              <motion.dl
-                variants={rise}
-                className="flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-border pt-6"
+              <dl
+                className="flex animate-rise flex-wrap items-center gap-x-8 gap-y-3 border-t border-border pt-6"
+                style={rise(6)}
               >
                 {location ? (
                   <div className="flex items-center gap-2">
@@ -195,14 +200,14 @@ export function Hero({ profile, tech }: HeroProps) {
                     </dd>
                   </div>
                 ) : null}
-              </motion.dl>
+              </dl>
             ) : null}
           </div>
 
           {/* ── RIGHT: the profile, as source ── */}
-          <motion.div
-            variants={rise}
-            className="relative mx-auto w-full max-w-md lg:mx-0"
+          <div
+            className="relative mx-auto w-full max-w-md animate-rise lg:mx-0"
+            style={rise(2)}
           >
             <div className="relative">
               {/*
@@ -224,27 +229,20 @@ export function Hero({ profile, tech }: HeroProps) {
               */}
               <CodeCard profile={profile} className="relative" />
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* Tech strip — a quiet summary of the stack before the reader scrolls. */}
         {tech.length > 0 ? (
-          <motion.div
-            className="mt-14 border-t border-border pt-7"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.9, duration: 0.6 }}
+          <div
+            className="mt-14 animate-fade border-t border-border pt-7"
+            style={{ animationDelay: "700ms" }}
           >
             <TechMarquee items={tech} />
-          </motion.div>
+          </div>
         ) : null}
 
-        <motion.div
-          className="mt-10 flex justify-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.1 }}
-        >
+        <div className="mt-10 flex animate-fade justify-center" style={{ animationDelay: "900ms" }}>
           <Link
             href="#about"
             className="group flex flex-col items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
@@ -256,7 +254,7 @@ export function Hero({ profile, tech }: HeroProps) {
             />
             <span className="sr-only">Jump to the About section</span>
           </Link>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

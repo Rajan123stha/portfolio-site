@@ -1,7 +1,7 @@
 import Script from "next/script";
 
-import CustomCursor from "@/components/customcursor";
 import { AnalyticsBeacon } from "@/components/layout/analytics-beacon";
+import { DeferredCursor } from "@/components/layout/deferred-cursor";
 import { MotionProvider } from "@/components/layout/motion-provider";
 import { getSiteSettings } from "@/lib/queries/public";
 
@@ -47,7 +47,7 @@ export default async function SiteLayout({
       <AnalyticsBeacon />
 
       <MotionProvider>
-        <CustomCursor />
+        <DeferredCursor />
         {children}
       </MotionProvider>
 

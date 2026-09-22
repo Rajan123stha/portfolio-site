@@ -61,6 +61,7 @@ export const heroBadgeSchema = z.object({
 export const profileSchema = z.object({
   greeting: optionalText(60),
   fullName: requiredText("Full name", 80),
+  headline: optionalText(80),
   typewriterWords: z
     .array(z.object({ text: requiredText("Word", 32) }))
     .max(8, "Eight words is plenty for a typewriter loop")
@@ -176,6 +177,10 @@ export const projectSchema = z.object({
   tech: textList(40),
   demoUrl: optionalUrl,
   codeUrl: optionalUrl,
+  imageAlt: optionalText(200),
+  challenge: optionalText(2000),
+  approach: optionalText(3000),
+  outcome: optionalText(2000),
   featured: z.boolean().default(false),
   visible: z.boolean().default(true),
 });

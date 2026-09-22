@@ -12,12 +12,16 @@ import { ALL_CACHE_TAGS, CACHE_TAGS, type CacheTag } from "@/lib/queries/keys";
  *
  * Call this at the end of every write. `revalidateTag` clears the data-cache
  * entries in `lib/queries/public.ts`; `revalidatePath` additionally discards
- * the rendered page shell, which is what makes an edit visible on the very next
- * request instead of the one after it.
+ * the statically rendered pages, which is what makes an edit visible on the
+ * very next request.
+ *
+ * The whole layout is revalidated rather than just "/": the homepage, every
+ * project page, the projects index, the sitemap and the share images are all
+ * built from the same content, and any edit can change several of them.
  */
 export function revalidateContent(tags: CacheTag[] = ALL_CACHE_TAGS): void {
   for (const tag of tags) revalidateTag(tag);
-  revalidatePath("/");
+  revalidatePath("/", "layout");
 }
 
 export { CACHE_TAGS };

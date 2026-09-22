@@ -127,6 +127,11 @@ export const profile = pgTable("profile", {
   // Hero
   greeting: text("greeting").notNull().default("Hi 👋, I'm"),
   fullName: text("full_name").notNull(),
+  /**
+   * Role line shown under the name, inside the page's <h1>. It's what a search
+   * engine reads as the page's main topic, so it names the work, not a slogan.
+   */
+  headline: text("headline").notNull().default(""),
   typewriterWords: jsonb("typewriter_words")
     .$type<TypewriterWord[]>()
     .notNull()
@@ -302,6 +307,15 @@ export const projects = pgTable("projects", {
   tech: jsonb("tech").$type<string[]>().notNull().default([]),
   demoUrl: text("demo_url"),
   codeUrl: text("code_url"),
+  /** Describes the screenshot for screen readers and image search. */
+  imageAlt: text("image_alt").notNull().default(""),
+  /**
+   * Case-study sections for the project's own page. Each is optional; the page
+   * shows only the ones that have been written.
+   */
+  challenge: text("challenge").notNull().default(""),
+  approach: text("approach").notNull().default(""),
+  outcome: text("outcome").notNull().default(""),
   featured: boolean("featured").notNull().default(false),
   sortOrder: integer("sort_order").notNull().default(0),
   visible: boolean("visible").notNull().default(true),
