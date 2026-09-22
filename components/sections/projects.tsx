@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Github, ImageOff, Star } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Github, ImageOff, Star } from "lucide-react";
 
 import type {
   ProjectCategoryView,
@@ -135,6 +135,16 @@ export function Projects({
             ))}
           </AnimatePresence>
         </motion.div>
+
+        <div className="mt-10 flex justify-center">
+          <Link
+            href="/projects"
+            className="group inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-medium transition-colors hover:border-primary/40 hover:text-primary"
+          >
+            Browse all project case studies
+            <ArrowRight aria-hidden className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </div>
       </div>
     </section>
   );
@@ -151,10 +161,13 @@ function displayHost(url: string | null): string {
 }
 
 function ProjectCard({ project }: { project: ProjectView }) {
-  const { title, description, imageUrl, tech, demoUrl, codeUrl, featured } =
+  const { title, slug, description, imageUrl, imageAlt, tech, demoUrl, codeUrl, featured } =
     project;
 
-  const primaryHref = demoUrl ?? codeUrl;
+  // The card opens the project's own case-study page. It used to link straight
+  // to the live site, which sent visitors away from the portfolio on their
+  // first click and gave search engines no internal path to a project page.
+  const caseStudyHref = `/projects/${slug}`;
 
   return (
     <article
@@ -227,7 +240,7 @@ function ProjectCard({ project }: { project: ProjectView }) {
             {imageUrl ? (
               <Image
                 src={imageUrl}
-                alt={`Screenshot of ${title}`}
+                alt={imageAlt || `Screenshot of ${title}`}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 /*
@@ -261,18 +274,12 @@ function ProjectCard({ project }: { project: ProjectView }) {
                 primary action, while the explicit links below stay individually
                 reachable because they sit above it in the stacking order.
               */}
-              {primaryHref ? (
-                <Link
-                  href={primaryHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors before:absolute before:inset-0 before:z-0 before:content-[''] hover:text-primary"
-                >
-                  {title}
-                </Link>
-              ) : (
-                title
-              )}
+              <Link
+                href={caseStudyHref}
+                className="transition-colors before:absolute before:inset-0 before:z-0 before:content-[''] hover:text-primary"
+              >
+                {title}
+              </Link>
             </h3>
 
             {project.category ? (
@@ -302,8 +309,18 @@ function ProjectCard({ project }: { project: ProjectView }) {
           </ul>
         ) : null}
 
-        {demoUrl || codeUrl ? (
-          <div className="relative z-10 mt-auto flex items-center gap-4 border-t border-border pt-4">
+        <div className="relative z-10 mt-auto flex items-center gap-4 border-t border-border pt-4">
+            <Link
+              href={caseStudyHref}
+              className="group/link inline-flex items-center gap-1.5 font-mono text-xs font-medium text-primary"
+            >
+              Case study
+              <ArrowRight
+                aria-hidden
+                className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:translate-x-0.5"
+              />
+            </Link>
+
             {demoUrl ? (
               <ProjectLink href={demoUrl} label={`Live demo of ${title}`}>
                 Live demo
@@ -321,7 +338,6 @@ function ProjectCard({ project }: { project: ProjectView }) {
               </ProjectLink>
             ) : null}
           </div>
-        ) : null}
       </div>
     </article>
   );

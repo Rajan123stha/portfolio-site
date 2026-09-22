@@ -180,6 +180,7 @@ const fetchPortfolio = unstable_cache(
         .select({
           greeting: profileTable.greeting,
           fullName: profileTable.fullName,
+          headline: profileTable.headline,
           typewriterWords: profileTable.typewriterWords,
           availabilityLabel: profileTable.availabilityLabel,
           availabilityVisible: profileTable.availabilityVisible,
@@ -280,6 +281,10 @@ const fetchPortfolio = unstable_cache(
           tech: true,
           demoUrl: true,
           codeUrl: true,
+          imageAlt: true,
+          challenge: true,
+          approach: true,
+          outcome: true,
           featured: true,
         },
         where: eq(projects.visible, true),

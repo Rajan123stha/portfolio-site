@@ -1,4 +1,6 @@
-import { AssistantWidget } from "@/components/assistant/assistant-widget";
+import type { Metadata } from "next";
+
+import { LazyAssistantWidget } from "@/components/assistant/assistant-widget-lazy";
 import { ScrollProgress } from "@/components/layout/scroll-progress";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -18,24 +20,28 @@ import {
 import { buildKnowledge } from "@/lib/assistant/knowledge";
 import { defaultWelcome, resolveQuestions } from "@/lib/assistant/suggestions";
 import { sectionVisibility } from "@/lib/content/visibility";
+import { JsonLd } from "@/components/seo/json-ld";
 import { getPortfolio, getSiteSettings } from "@/lib/queries/public";
+import { homeGraph } from "@/lib/seo/structured-data";
 
 /**
- * Rendered per request rather than prerendered at build time.
+ * Statically rendered and served from the CDN, regenerated on change.
  *
- * Static generation would bake the page into the build output, but it also
- * makes the build require live database credentials — so a transient Neon
- * outage, a CI job, or a preview deploy without secrets would fail the build
- * outright.
+ * This page used to render on every request. The data was cached, but each
+ * visit still paid for a server render — a 2.8s time-to-first-byte on the live
+ * site, which delays everything a visitor (and a crawler measuring Core Web
+ * Vitals) sees. As static HTML it arrives from the nearest edge instead.
  *
- * Nothing is given up by rendering dynamically, because the cost that matters
- * is the database round-trip and `unstable_cache` has already removed it: a
- * warm request reads the whole page payload from the data cache and never
- * touches Postgres. Invalidation is then a single explicit mechanism —
- * `revalidateTag` from the admin actions — instead of also having to reason
- * about the full route cache.
+ * Freshness is unchanged: every admin save calls `revalidateContent()`, which
+ * regenerates the page on the next request, and the hourly `revalidate` is only
+ * a backstop. A build without database access still succeeds — the queries
+ * fall back to bundled content — and the backstop replaces that version with
+ * real content within the hour.
  */
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+
+/** Title, description and share image come from the root layout. */
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default async function PortfolioPage() {
   /**
@@ -74,6 +80,7 @@ export default async function PortfolioPage() {
 
   return (
     <>
+      <JsonLd data={homeGraph(data, settings)} />
       <ScrollProgress />
 
       <SiteHeader
@@ -156,7 +163,7 @@ export default async function PortfolioPage() {
       />
 
       {assistant ? (
-        <AssistantWidget
+        <LazyAssistantWidget
           firstName={assistantName}
           avatarUrl={profile.avatarUrl}
           availability={
