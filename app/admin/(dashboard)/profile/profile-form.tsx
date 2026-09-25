@@ -22,6 +22,7 @@ import { profileSchema, type ProfileInput } from "@/lib/validators/content";
 const BLANK: ProfileInput = {
   greeting: "Hi 👋, I'm",
   fullName: "",
+  headline: "",
   typewriterWords: [],
   availabilityLabel: "Available for work",
   availabilityVisible: true,
@@ -51,6 +52,7 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
       ? {
           greeting: profile.greeting,
           fullName: profile.fullName,
+          headline: profile.headline,
           typewriterWords: profile.typewriterWords,
           availabilityLabel: profile.availabilityLabel,
           availabilityVisible: profile.availabilityVisible,
@@ -105,6 +107,21 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
                 {...props}
                 className={inputClass}
                 placeholder="Rajan Shrestha"
+              />
+            )}
+          </Field>
+
+          <Field
+            label="Headline"
+            hint="Your role, shown under your name in the page's main heading — the line search engines weigh most. Name the work: “Frontend & Full-Stack Developer” beats a slogan."
+            error={errors.headline?.message}
+          >
+            {(props) => (
+              <input
+                {...register("headline")}
+                {...props}
+                className={inputClass}
+                placeholder="Frontend & Full-Stack Developer"
               />
             )}
           </Field>

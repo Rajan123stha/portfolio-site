@@ -26,6 +26,10 @@ const BLANK: ProjectInput = {
   tech: [],
   demoUrl: null,
   codeUrl: null,
+  imageAlt: "",
+  challenge: "",
+  approach: "",
+  outcome: "",
   featured: false,
   visible: true,
 };
@@ -53,6 +57,10 @@ export function ProjectForm({
           tech: project.tech,
           demoUrl: project.demoUrl,
           codeUrl: project.codeUrl,
+          imageAlt: project.imageAlt,
+          challenge: project.challenge,
+          approach: project.approach,
+          outcome: project.outcome,
           featured: project.featured,
           visible: project.visible,
         }
@@ -197,6 +205,56 @@ export function ProjectForm({
             />
           )}
         />
+
+        <Field
+          label="Image description"
+          hint="What the screenshot shows, for screen readers and Google Images — e.g. “Booking dashboard listing enquiries and follow-ups”. Leave blank to use the title."
+          error={errors.imageAlt?.message}
+        >
+          {(props) => (
+            <input
+              {...register("imageAlt")}
+              {...props}
+              className={inputClass}
+              placeholder="Dashboard showing…"
+            />
+          )}
+        </Field>
+      </Panel>
+
+      <Panel
+        title="Case study"
+        description="The project gets its own page at /projects/<slug>. These sections are its main content — the more specific they are, the better the page ranks for searches about this kind of work. Blank sections are hidden."
+      >
+        <Field
+          label="The challenge"
+          hint="Who needed it and what problem it solved. Plain language a client would use."
+          error={errors.challenge?.message}
+        >
+          {(props) => (
+            <textarea {...register("challenge")} {...props} rows={4} className={textareaClass} />
+          )}
+        </Field>
+
+        <Field
+          label="How it was built"
+          hint="Your role, the architecture and the decisions behind it. Name the technologies — that's what people search for."
+          error={errors.approach?.message}
+        >
+          {(props) => (
+            <textarea {...register("approach")} {...props} rows={6} className={textareaClass} />
+          )}
+        </Field>
+
+        <Field
+          label="The outcome"
+          hint="What changed once it shipped: speed, time saved, users, rankings. Real numbers only."
+          error={errors.outcome?.message}
+        >
+          {(props) => (
+            <textarea {...register("outcome")} {...props} rows={4} className={textareaClass} />
+          )}
+        </Field>
       </Panel>
 
       <Panel title="Links">

@@ -353,6 +353,61 @@
   }
 }
 
+/*
+ * Above-the-fold entrances. Pure CSS so they run from the first paint instead
+ * of waiting for JavaScript to hydrate — the hero is the page's Largest
+ * Contentful Paint, and it can't count as painted while held at opacity 0.
+ * `both` holds the start frame through any `animation-delay`.
+ */
+.animate-rise {
+  animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade {
+  animation: fade 0.6s ease-out both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/*
+ * Below-the-fold scroll reveals, driven by the `Reveal` component
+ * (components/sections/reveal.tsx) rather than framer-motion's `whileInView`.
+ * One transition rule covers every offset/duration/delay combination via the
+ * custom properties `Reveal` sets inline; `[data-visible]` is added by its
+ * IntersectionObserver the first time the element scrolls into view.
+ */
+.reveal {
+  opacity: 0;
+  transform: translate(var(--reveal-x, 0px), var(--reveal-y, 0px));
+  transition:
+    opacity var(--reveal-duration, 0.5s) ease-out var(--reveal-delay, 0s),
+    transform var(--reveal-duration, 0.5s) cubic-bezier(0.16, 1, 0.3, 1)
+      var(--reveal-delay, 0s);
+}
+
+.reveal[data-visible] {
+  opacity: 1;
+  transform: none;
+}
+
 @keyframes shimmer {
   100% {
     transform: translateX(100%);

@@ -1,10 +1,7 @@
-"use client";
-
-import { motion } from "framer-motion";
-
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { resolveIcon } from "@/lib/design-tokens";
 import type { SectionView, SkillGroupView } from "@/lib/queries/public";
+import { Reveal } from "./reveal";
 import { SectionGlow, SectionRules } from "./section-decor";
 import { SectionHeading } from "./section-heading";
 
@@ -12,16 +9,6 @@ type SkillsProps = {
   section: SectionView;
   groups: SkillGroupView[];
   index: number;
-};
-
-const list = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.035 } },
-};
-
-const chip = {
-  hidden: { opacity: 0, y: 8 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.35 } },
 };
 
 /**
@@ -49,12 +36,12 @@ export function Skills({ section, groups, index }: SkillsProps) {
             const Icon = resolveIcon(group.icon);
 
             return (
-              <motion.div
+              <Reveal
                 key={group.id}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.55, delay: 0.1 * groupIndex }}
+                y={24}
+                duration={0.55}
+                delay={0.1 * groupIndex}
+                margin={60}
               >
                 <SpotlightCard className="h-full p-7">
                   <div className="relative flex h-full flex-col gap-6">
@@ -77,15 +64,15 @@ export function Skills({ section, groups, index }: SkillsProps) {
 
                     <div aria-hidden className="h-px bg-border" />
 
-                    <motion.ul
-                      className="flex flex-wrap gap-2"
-                      variants={list}
-                      initial="hidden"
-                      whileInView="visible"
-                      viewport={{ once: true }}
-                    >
-                      {group.skills.map((skill) => (
-                        <motion.li key={skill.id} variants={chip}>
+                    <ul className="flex flex-wrap gap-2">
+                      {group.skills.map((skill, skillIndex) => (
+                        <Reveal
+                          key={skill.id}
+                          as="li"
+                          y={8}
+                          duration={0.35}
+                          delay={skillIndex * 0.035}
+                        >
                           <span className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary">
                             <span
                               aria-hidden
@@ -93,12 +80,12 @@ export function Skills({ section, groups, index }: SkillsProps) {
                             />
                             {skill.name}
                           </span>
-                        </motion.li>
+                        </Reveal>
                       ))}
-                    </motion.ul>
+                    </ul>
                   </div>
                 </SpotlightCard>
-              </motion.div>
+              </Reveal>
             );
           })}
         </div>
