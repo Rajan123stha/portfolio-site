@@ -1,9 +1,6 @@
-"use client";
-
-import { motion } from "framer-motion";
-
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import type { ExperienceView, SectionView } from "@/lib/queries/public";
+import { Reveal } from "./reveal";
 import { SectionGlow, SectionRules } from "./section-decor";
 import { SectionHeading } from "./section-heading";
 
@@ -32,14 +29,14 @@ export function Experience({ section, experiences, index }: ExperienceProps) {
         */}
         <ol className="relative space-y-0">
           {experiences.map((experience, i) => (
-            <motion.li
+            <Reveal
+              as="li"
               key={experience.id}
               id={`experience-${experience.id}`}
               className="group relative grid scroll-mt-28 gap-4 rounded-2xl pb-10 md:grid-cols-[180px_1fr] md:gap-10"
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.55, delay: 0.08 * i }}
+              y={24}
+              duration={0.55}
+              delay={0.08 * i}
             >
               {/* Meta column */}
               <div className="relative md:pt-1">
@@ -108,7 +105,7 @@ export function Experience({ section, experiences, index }: ExperienceProps) {
                   </div>
                 </SpotlightCard>
               </div>
-            </motion.li>
+            </Reveal>
           ))}
         </ol>
       </div>

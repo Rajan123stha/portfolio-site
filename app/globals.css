@@ -387,6 +387,27 @@
   }
 }
 
+/*
+ * Below-the-fold scroll reveals, driven by the `Reveal` component
+ * (components/sections/reveal.tsx) rather than framer-motion's `whileInView`.
+ * One transition rule covers every offset/duration/delay combination via the
+ * custom properties `Reveal` sets inline; `[data-visible]` is added by its
+ * IntersectionObserver the first time the element scrolls into view.
+ */
+.reveal {
+  opacity: 0;
+  transform: translate(var(--reveal-x, 0px), var(--reveal-y, 0px));
+  transition:
+    opacity var(--reveal-duration, 0.5s) ease-out var(--reveal-delay, 0s),
+    transform var(--reveal-duration, 0.5s) cubic-bezier(0.16, 1, 0.3, 1)
+      var(--reveal-delay, 0s);
+}
+
+.reveal[data-visible] {
+  opacity: 1;
+  transform: none;
+}
+
 @keyframes shimmer {
   100% {
     transform: translateX(100%);

@@ -26,13 +26,16 @@ export default async function SiteLayout({
       {/*
         Without JavaScript the page would render blank.
         Framer Motion serialises each element's `initial` variant into the
-        server-rendered markup as `style="opacity:0"`, and the script that would
-        animate it to 1 never runs. The reveal is pure decoration, so the
-        fallback simply skips it and shows the finished state.
+        server-rendered markup as `style="opacity:0"`; the sections that don't
+        use framer instead reach for the `.reveal` class (see `Reveal` /
+        `globals.css`), which starts at `opacity: 0` in CSS rather than inline.
+        Either way, the script that would animate it to 1 never runs without
+        JS. The reveal is pure decoration, so the fallback simply skips it and
+        shows the finished state.
       */}
       <noscript>
         <style>{`
-          [style*="opacity:0"] {
+          [style*="opacity:0"], .reveal {
             opacity: 1 !important;
             transform: none !important;
           }

@@ -1,6 +1,3 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowUpRight, Check } from "lucide-react";
 
@@ -8,6 +5,7 @@ import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { resolveIcon } from "@/lib/design-tokens";
 import type { SectionView, ServiceView } from "@/lib/queries/public";
 import { cn } from "@/lib/utils";
+import { Reveal } from "./reveal";
 import { SectionGlow, SectionRules } from "./section-decor";
 import { SectionHeading } from "./section-heading";
 
@@ -15,16 +13,6 @@ type ServicesProps = {
   section: SectionView;
   services: ServiceView[];
   index: number;
-};
-
-const list = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.06 } },
-};
-
-const item = {
-  hidden: { opacity: 0, x: -6 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.35 } },
 };
 
 /**
@@ -52,12 +40,12 @@ export function Services({ section, services, index }: ServicesProps) {
             const Icon = resolveIcon(service.icon);
 
             return (
-              <motion.div
+              <Reveal
                 key={service.id}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.5, delay: 0.07 * serviceIndex }}
+                y={24}
+                duration={0.5}
+                delay={0.07 * serviceIndex}
+                margin={60}
               >
                 <SpotlightCard
                   className={cn(
@@ -99,17 +87,15 @@ export function Services({ section, services, index }: ServicesProps) {
                     ) : null}
 
                     {service.deliverables.length > 0 ? (
-                      <motion.ul
-                        className="mt-auto space-y-2.5 border-t border-border pt-5"
-                        variants={list}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true }}
-                      >
-                        {service.deliverables.map((deliverable) => (
-                          <motion.li
+                      <ul className="mt-auto space-y-2.5 border-t border-border pt-5">
+                        {service.deliverables.map((deliverable, deliverableIndex) => (
+                          <Reveal
                             key={deliverable}
-                            variants={item}
+                            as="li"
+                            x={-6}
+                            y={0}
+                            duration={0.35}
+                            delay={deliverableIndex * 0.06}
                             className="flex items-start gap-2.5"
                           >
                             <span
@@ -121,25 +107,24 @@ export function Services({ section, services, index }: ServicesProps) {
                             <span className="text-[13px] leading-relaxed text-muted-foreground">
                               {deliverable}
                             </span>
-                          </motion.li>
+                          </Reveal>
                         ))}
-                      </motion.ul>
+                      </ul>
                     ) : null}
                   </div>
                 </SpotlightCard>
-              </motion.div>
+              </Reveal>
             );
           })}
         </div>
 
         {/* One shared call to action — a button per card would compete with
             itself and give the reader four identical decisions to make. */}
-        <motion.div
+        <Reveal
           className="mt-8 flex flex-col items-center gap-4 rounded-2xl border border-border bg-card px-6 py-7 text-center sm:flex-row sm:justify-between sm:text-left"
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.45, delay: 0.15 }}
+          y={16}
+          duration={0.45}
+          delay={0.15}
         >
           <div>
             <p className="text-base font-semibold tracking-tight">
@@ -161,7 +146,7 @@ export function Services({ section, services, index }: ServicesProps) {
               className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
             />
           </Link>
-        </motion.div>
+        </Reveal>
       </div>
     </section>
   );

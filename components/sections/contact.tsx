@@ -1,7 +1,6 @@
 "use client";
 
 import { useTransition } from "react";
-import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowUpRight, Loader2, Send } from "lucide-react";
@@ -17,6 +16,7 @@ import {
 } from "@/lib/validators/message";
 import type { ContactLinkView, SectionView } from "@/lib/queries/public";
 import { cn } from "@/lib/utils";
+import { Reveal } from "./reveal";
 import { SectionGlow, SectionRules } from "./section-decor";
 import { SectionHeading } from "./section-heading";
 
@@ -88,27 +88,27 @@ export function Contact({ section, links, index }: ContactProps) {
             />
 
             {section.subheading ? (
-              <motion.p
+              <Reveal
+                as="p"
                 className="text-lg leading-relaxed text-muted-foreground text-pretty"
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.15 }}
+                y={16}
+                duration={0.5}
+                delay={0.15}
               >
                 {section.subheading}
-              </motion.p>
+              </Reveal>
             ) : null}
 
             {section.note ? (
-              <motion.p
+              <Reveal
+                as="p"
                 className="text-xl font-semibold tracking-tight text-balance"
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.22 }}
+                y={12}
+                duration={0.5}
+                delay={0.22}
               >
                 {section.note}
-              </motion.p>
+              </Reveal>
             ) : null}
 
             {links.length > 0 ? (
@@ -118,12 +118,13 @@ export function Contact({ section, links, index }: ContactProps) {
                   const external = link.href.startsWith("http");
 
                   return (
-                    <motion.li
+                    <Reveal
+                      as="li"
                       key={link.id}
-                      initial={{ opacity: 0, x: -12 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.4, delay: 0.28 + i * 0.07 }}
+                      x={-12}
+                      y={0}
+                      duration={0.4}
+                      delay={0.28 + i * 0.07}
                     >
                       <a
                         href={link.href}
@@ -147,7 +148,7 @@ export function Contact({ section, links, index }: ContactProps) {
                           className="h-4 w-4 shrink-0 text-muted-foreground transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary"
                         />
                       </a>
-                    </motion.li>
+                    </Reveal>
                   );
                 })}
               </ul>
@@ -155,12 +156,7 @@ export function Contact({ section, links, index }: ContactProps) {
           </div>
 
           {/* ── Form ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.55, delay: 0.2 }}
-          >
+          <Reveal y={24} duration={0.55} delay={0.2} margin={60}>
             <SpotlightCard className="p-7 md:p-8">
               <form className="relative space-y-5" onSubmit={onSubmit} noValidate>
                 <div className="grid gap-5 sm:grid-cols-2">
@@ -234,7 +230,7 @@ export function Contact({ section, links, index }: ContactProps) {
                 </p>
               </form>
             </SpotlightCard>
-          </motion.div>
+          </Reveal>
         </div>
       </div>
     </section>
