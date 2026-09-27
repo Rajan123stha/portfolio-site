@@ -261,29 +261,43 @@ export default async function ProjectPage({ params }: Params) {
 
         {/* ── Previous / next ── */}
         {previous || next ? (
-          <nav aria-label="More case studies" className="mt-14 grid gap-4 sm:grid-cols-2">
+          <nav
+            aria-label="More case studies"
+            className="mt-14 flex flex-col gap-4 border-t border-border pt-8 sm:flex-row sm:items-stretch"
+          >
+            {/*
+              Flex rather than a fixed two-column grid: with only one
+              neighbour (the first or last project in the list), a grid left
+              an empty placeholder box sitting where the missing button would
+              have been. Here a lone button just sits on its own side —
+              `sm:ml-auto` is what pushes "Next" to the right whether or not
+              "Previous" exists next to it.
+            */}
             {previous ? (
               <Link
                 href={`/projects/${previous.slug}`}
-                className="group rounded-2xl border border-border p-5 transition-colors hover:border-primary/40"
+                className="group min-w-0 flex-1 rounded-2xl border border-border p-5 transition-colors hover:border-primary/40 sm:max-w-[calc(50%-0.5rem)]"
               >
                 <span className="flex items-center gap-1.5 label-mono text-muted-foreground">
-                  <ArrowLeft aria-hidden className="h-3 w-3" /> Previous
+                  <ArrowLeft aria-hidden className="h-3 w-3 shrink-0" /> Previous
                 </span>
-                <span className="mt-2 block font-medium group-hover:text-primary">{previous.title}</span>
+                <span className="mt-2 block truncate font-medium group-hover:text-primary">
+                  {previous.title}
+                </span>
               </Link>
-            ) : (
-              <span />
-            )}
+            ) : null}
+
             {next ? (
               <Link
                 href={`/projects/${next.slug}`}
-                className="group rounded-2xl border border-border p-5 text-right transition-colors hover:border-primary/40"
+                className="group min-w-0 flex-1 rounded-2xl border border-border p-5 text-right transition-colors hover:border-primary/40 sm:ml-auto sm:max-w-[calc(50%-0.5rem)]"
               >
                 <span className="flex items-center justify-end gap-1.5 label-mono text-muted-foreground">
-                  Next <ArrowRight aria-hidden className="h-3 w-3" />
+                  Next <ArrowRight aria-hidden className="h-3 w-3 shrink-0" />
                 </span>
-                <span className="mt-2 block font-medium group-hover:text-primary">{next.title}</span>
+                <span className="mt-2 block truncate font-medium group-hover:text-primary">
+                  {next.title}
+                </span>
               </Link>
             ) : null}
           </nav>
