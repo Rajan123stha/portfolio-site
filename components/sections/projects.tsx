@@ -314,7 +314,7 @@ function ProjectCard({ project }: { project: ProjectView }) {
               href={caseStudyHref}
               className="group/link inline-flex items-center gap-1.5 font-mono text-xs font-medium text-primary"
             >
-              Case study
+              View details
               <ArrowRight
                 aria-hidden
                 className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:translate-x-0.5"

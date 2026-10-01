@@ -49,7 +49,10 @@ export function Hero({ profile, tech }: HeroProps) {
   return (
     <section
       id="intro"
-      className="relative scroll-mt-24 overflow-hidden pb-12 pt-14 md:pb-16 md:pt-20"
+      // The sticky header already reserves its own 64px, so the section
+      // itself only needs a little breathing room, not a second full
+      // header-height of padding stacked on top of it.
+      className="relative scroll-mt-24 overflow-hidden pb-12 pt-4 md:pb-16 md:pt-8"
     >
       {/*
         Blueprint grid + accent blooms.
