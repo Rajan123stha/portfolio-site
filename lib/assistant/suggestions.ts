@@ -24,9 +24,18 @@ export const DEFAULT_ASSISTANT_QUESTIONS = [
 
 export const MAX_ASSISTANT_QUESTIONS = 8;
 
-export function resolveQuestions(custom: string[], firstName: string): string[] {
-  const source = custom.length > 0 ? custom : DEFAULT_ASSISTANT_QUESTIONS;
-  return source
+/**
+ * Expands `{name}` in whatever question list was actually saved — no implicit
+ * fallback to the defaults here. An empty array means the owner has deliberately
+ * switched off every suggestion, not "nobody's configured this yet"; that
+ * distinction is what makes the admin checklist's on/off toggles trustworthy —
+ * unchecking everything needs to actually show nothing, not quietly keep
+ * showing all eight. A brand-new, never-touched site still gets the defaults,
+ * because `DEFAULT_SITE_SETTINGS.assistantQuestions` (lib/content/defaults.ts)
+ * is seeded with `DEFAULT_ASSISTANT_QUESTIONS` itself.
+ */
+export function resolveQuestions(selected: string[], firstName: string): string[] {
+  return selected
     .map((question) => question.replaceAll("{name}", firstName).trim())
     .filter(Boolean)
     .slice(0, MAX_ASSISTANT_QUESTIONS);

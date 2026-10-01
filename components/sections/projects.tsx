@@ -123,7 +123,7 @@ export function Projects({
               <motion.div
                 key={project.id}
                 id={`project-${project.slug}`}
-                className="scroll-mt-28 rounded-2xl"
+                className="min-w-0 scroll-mt-28 rounded-2xl"
                 layout
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -268,7 +268,7 @@ function ProjectCard({ project }: { project: ProjectView }) {
       <div className="relative flex flex-1 flex-col gap-4 p-6">
         <div className="space-y-2">
           <div className="flex items-start justify-between gap-3">
-            <h3 className="text-[17px] font-semibold leading-snug tracking-tight text-balance">
+            <h3 className="min-w-0 text-[17px] font-semibold leading-snug tracking-tight text-balance">
               {/*
                 Stretched link: the whole card is the click target for the
                 primary action, while the explicit links below stay individually
@@ -309,7 +309,7 @@ function ProjectCard({ project }: { project: ProjectView }) {
           </ul>
         ) : null}
 
-        <div className="relative z-10 mt-auto flex items-center gap-4 border-t border-border pt-4">
+        <div className="relative z-10 mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border pt-4">
             <Link
               href={caseStudyHref}
               className="group/link inline-flex items-center gap-1.5 font-mono text-xs font-medium text-primary"

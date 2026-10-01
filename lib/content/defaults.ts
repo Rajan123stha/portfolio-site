@@ -1,3 +1,4 @@
+import { DEFAULT_ASSISTANT_QUESTIONS } from "@/lib/assistant/suggestions";
 import type {
   ContactLinkView,
   CoreStackView,
@@ -58,7 +59,10 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsView = {
   // The assistant stays off until the owner enables it in the CMS.
   assistantEnabled: false,
   assistantWelcome: "",
-  assistantQuestions: [],
+  // Seeded with the real catalog, not an empty array: `resolveQuestions` no
+  // longer treats "empty" as "use the defaults" — that ambiguity is exactly
+  // what broke the admin's deselect-everything checkbox.
+  assistantQuestions: [...DEFAULT_ASSISTANT_QUESTIONS],
   assistantPronouns: "",
 };
 

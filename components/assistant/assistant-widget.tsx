@@ -217,7 +217,7 @@ export function AssistantWidget({
     questionsLeft > 0 &&
     last?.role === "assistant" &&
     last.status === "done"
-      ? questions.filter((question) => !asked.has(question)).slice(0, 3)
+      ? questions.filter((question) => !asked.has(question)).slice(0, 2)
       : [];
 
   const nearLimit = draft.length > MAX_QUESTION_LENGTH * 0.8;

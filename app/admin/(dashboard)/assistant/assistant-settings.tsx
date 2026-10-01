@@ -8,19 +8,14 @@ import { toast } from "sonner";
 
 import { Field, inputClass, textareaClass } from "@/components/admin/form-field";
 import { Panel } from "@/components/admin/page-header";
-import { RepeatableList } from "@/components/admin/repeatable-list";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { useActionForm } from "@/components/admin/use-action-form";
 import { Switch } from "@/components/ui/switch";
 import { setAssistantEnabled, updateAssistantSettings } from "@/lib/actions/assistant";
-import {
-  DEFAULT_ASSISTANT_QUESTIONS,
-  MAX_ASSISTANT_QUESTIONS,
-  defaultWelcome,
-  resolveQuestions,
-} from "@/lib/assistant/suggestions";
+import { defaultWelcome } from "@/lib/assistant/suggestions";
 import { assistantSettingsSchema } from "@/lib/validators/content";
 import { cn } from "@/lib/utils";
+import { QuestionPicker } from "./question-picker";
 
 type AssistantSettingsProps = {
   firstName: string;
@@ -76,11 +71,9 @@ export function AssistantSettings({ firstName, settings, status }: AssistantSett
   const {
     register,
     control,
-    watch,
     formState: { errors, isDirty },
   } = form;
 
-  const questions = watch("assistantQuestions") ?? [];
   const configured = status.providerLabel !== null;
   const live = enabled && configured;
 
@@ -208,34 +201,14 @@ export function AssistantSettings({ firstName, settings, status }: AssistantSett
             control={control}
             name="assistantQuestions"
             render={({ field }) => (
-              <RepeatableList
-                label="Suggested questions"
-                hint={`One-tap starters, up to ${MAX_ASSISTANT_QUESTIONS}. Write {name} for your first name. Leave empty to use the recruiter defaults below.`}
-                variant="input"
-                placeholder={DEFAULT_ASSISTANT_QUESTIONS[0]}
-                addLabel="Add question"
-                values={field.value ?? []}
+              <QuestionPicker
+                firstName={firstName}
+                value={field.value ?? []}
                 onChange={field.onChange}
                 error={errors.assistantQuestions?.message}
               />
             )}
           />
-
-          {questions.filter((question) => question.trim()).length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border p-4">
-              <p className="label-mono text-muted-foreground">Using the recruiter defaults</p>
-              <ul className="mt-3 flex flex-wrap gap-2">
-                {resolveQuestions([], firstName).map((question) => (
-                  <li
-                    key={question}
-                    className="rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground"
-                  >
-                    {question}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
         </Panel>
       </form>
     </div>
